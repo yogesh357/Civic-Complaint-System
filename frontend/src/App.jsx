@@ -10,13 +10,19 @@ import { AuthProvider } from './context/AuthContext';
 import { ComplaintProvider } from './context/ComplaintContext';
 // import './assets/styles/App.css';
 import './App.css'
-import Login from './components/Login';
+import UserLogin from './components/UserLogin';
+import OfficerLogin from './components/OfficerLogin';
+//::::::;;
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Test from './components/Test';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
         <ComplaintProvider>
+
           <div className="App">
             <Navbar />
             <div className="main-content">
@@ -26,11 +32,27 @@ function App() {
                 <Route path="/track-complaint" element={<TrackComplaint />} />
                 <Route path="/department" element={<DepartmentView />} />
                 {/* <Route path="/login" element={<Auth mode="login" />} /> */}
-                <Route path="/login" element={<Login />} />
+                <Route path="/citizen-login" element={<UserLogin />} />
+                <Route path="/officer-login" element={<OfficerLogin />} />
                 <Route path="/register" element={<Auth mode="register" />} />
+                <Route path="/test" element={<Test />} />
+
               </Routes>
             </div>
           </div>
+          {/* <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          /> */}
+          <ToastContainer />
         </ComplaintProvider>
       </AuthProvider>
     </Router>

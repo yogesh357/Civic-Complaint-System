@@ -1,9 +1,9 @@
-import React, { useState } from 'react' 
+import React, { useState } from 'react'
 import toast from 'react-hot-toast';
 import { useAuthContext } from '../context/AuthContext';
 
-function Login() {
-    const { setShowUserLogin, setUser, axios, navigate } = useAuthContext()
+function OfficerLogin() {
+    const { setShowUserLogin, setUser, axios, navigate,setUserType } = useAuthContext()
 
     const [state, setState] = useState("login");
     const [name, setName] = useState("");
@@ -18,6 +18,7 @@ function Login() {
             if (data.success) {
                 navigate('/')
                 setUser(data.user)
+                setUserType('officer')
                 setShowUserLogin(false)
 
             } else {
@@ -35,7 +36,7 @@ function Login() {
 
             <form onSubmit={onSubmitHandler} onClick={(e) => e.stopPropagation()} className="flex flex-col gap-4 m-auto items-start p-8 py-12 w-80 sm:w-[352px] rounded-lg shadow-xl border border-gray-200 bg-white">
                 <p className="text-2xl font-medium m-auto">
-                    <span className="text-green-800">User</span> {state === "login" ? "Login" : "Sign Up"}
+                    <span className="text-green-800">Municipality</span> {state === "login" ? "Login" : "Sign Up"}
                 </p>
                 {state === "register" && (
                     <div className="w-full">
@@ -69,4 +70,4 @@ function Login() {
 }
 
 
-export default Login
+export default OfficerLogin

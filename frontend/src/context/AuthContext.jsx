@@ -6,6 +6,8 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [showUserLogin , setShowUserLogin] = useState(false)
+  const[showAdminLogin,setAdminLogin] = useState(false)
+  const[userType , setUserType] = useState(null);
 
 
   
@@ -23,8 +25,7 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-
-// 3. Create the custom hook
+ 
 export function useAuthContext() {
   const context = useContext(AuthContext);
   if (!context) {

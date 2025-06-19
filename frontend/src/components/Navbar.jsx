@@ -1,7 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuthContext } from '../context/AuthContext';
 
-const Navbar = ({ isAuthenticated, userType }) => {
+const Navbar = ({ isAuthenticated }) => {
+
+  const {userType} = useAuthContext()
+
   return (
     <nav className="bg-white shadow-md px-6 py-4 flex justify-between items-center text-slate-800">
       {/* Logo / Brand */}

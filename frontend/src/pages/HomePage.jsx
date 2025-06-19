@@ -1,45 +1,5 @@
-// import React from 'react';
-// import ComplaintMap from '../components/ComplaintMap';
-// import ComplaintList from '../components/ComplaintList';
-// import { useComplaintContext } from '../context/ComplaintContext';
-// import { useAuthContext } from '../context/AuthContext';
 
-// const HomePage = () => {
-//   const { complaints, loading, error } = useComplaintContext();
-//   const {showUserLogin} = useAuthContext()
-//   const [selectedComplaint, setSelectedComplaint] = React.useState(null);
-
-//   if (loading) return <div>Loading complaints...</div>;
-//   if (error) return <div>Error: {error}</div>;
-
-//   return (
-//     <div className="home-page">
-//       <h1>Welcome to ReportHub</h1>
-//       <p>Report and track civic issues in your neighborhood</p>
-      
-//       <div className="map-container">
-//         <ComplaintMap 
-//           complaints={complaints} 
-//           center={selectedComplaint ? 
-//             [selectedComplaint.location.latitude, selectedComplaint.location.longitude] : 
-//             [51.505, -0.09]} // Default to London coordinates
-//           zoom={selectedComplaint ? 15 : 13}
-//         />
-//       </div>
-      
-//       <div className="recent-complaints">
-//         <h2>Recently Reported Issues</h2>
-//         <ComplaintList 
-//           complaints={complaints.slice(0, 5)} 
-//           onSelect={setSelectedComplaint}
-//         />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default HomePage;
-import React from 'react';
+import React, { useState } from 'react';
 import ComplaintMap from '../components/ComplaintMap';
 import ComplaintList from '../components/ComplaintList';
 import { useComplaintContext } from '../context/ComplaintContext';
@@ -47,10 +7,12 @@ import { useAuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
+
+
   const { complaints, loading, error } = useComplaintContext();
   const { user, showUserLogin, showAdminLogin } = useAuthContext();
   const navigate = useNavigate();
-  const [selectedComplaint, setSelectedComplaint] = React.useState(null);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
 
   if (loading) return <div className="text-center py-10 text-lg font-medium">Loading complaints...</div>;
   if (error) return <div className="text-red-600 text-center py-10">Error: {error}</div>;
@@ -66,19 +28,20 @@ const HomePage = () => {
           <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
             <button
               className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
-              onClick={showUserLogin}
+              onClick={()=>navigate('/citizen-login')}
             >
               Report an Issue as Citizen
             </button>
             <button
               className="bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 transition"
-              onClick={showAdminLogin}
+              onClick={()=>navigate('/officer-login')}
             >
               Municipality Dashboard Access
             </button>
           </div>
         ) : (
           <div className="mt-6 text-lg">
+
             {user.type === 'citizen' ? (
               <>
                 <p className="mb-4">Welcome back, <span className="font-semibold">{user.name}</span>! Ready to report a new issue?</p>
@@ -178,13 +141,13 @@ const HomePage = () => {
           <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
             <button
               className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
-              onClick={showUserLogin}
+              onClick={() => navigate('/citizen-login')}
             >
               Join as Citizen Reporter
             </button>
             <button
               className="bg-white border border-gray-400 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-100 transition"
-              onClick={showAdminLogin}
+              onClick={() => navigate('/officer-login')}
             >
               Municipality Login
             </button>

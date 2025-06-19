@@ -20,7 +20,7 @@ const SubmitComplaint = () => {
   };
 
   return (
-    <div className="submit-complaint-page">
+    <div className=" ">
       <h1>Report a Civic Issue</h1>
       
       {submissionStatus === 'submitting' && (
