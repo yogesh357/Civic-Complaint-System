@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import { useAuthContext } from '../context/AuthContext';
 
 function UserLogin() {
-    const { setShowUserLogin, setUser, axios, navigate, setUserType } = useAuthContext()
+    const { setShowUserLogin, setUser, axios, navigate, setUserType, showUserLogin } = useAuthContext()
 
     const [state, setState] = useState("login");
     const [name, setName] = useState("");
@@ -18,7 +18,7 @@ function UserLogin() {
             if (data.success) {
                 navigate('/')
                 setUser(data.user)
-                setShowUserLogin(false)
+                // setShowUserLogin(false)
                 setUserType('citizen')
 
             } else {
@@ -28,6 +28,8 @@ function UserLogin() {
             toast.error(error.message)
         }
     }
+
+    // if (!showUserLogin) return null
 
 
     return (

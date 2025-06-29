@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import StatusTracker from '../components/StatusTracker';
-import { fetchComplaintById } from '../services/api';
+import { fetchComplaintById, updateComplaintStatus } from '../services/api';
 
 const TrackComplaint = () => {
   const [searchParams] = useSearchParams();
@@ -9,6 +9,11 @@ const TrackComplaint = () => {
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [newStatus, setNewStatus] = useState('');
+  const [adminComment, setAdminComment] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadComplaint = async () => {
@@ -16,6 +21,7 @@ const TrackComplaint = () => {
         if (!complaintId) throw new Error('No complaint ID provided');
         const data = await fetchComplaintById(complaintId);
         setComplaint(data);
+        setNewStatus(data.status);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -26,36 +32,211 @@ const TrackComplaint = () => {
     loadComplaint();
   }, [complaintId]);
 
-  if (loading) return <div>Loading complaint details...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!complaint) return <div>No complaint found</div>;
+  const handleStatusUpdate = async (e) => {
+    e.preventDefault();
+    setStatusUpdateLoading(true);
+    try {
+      const updatedComplaint = await updateComplaintStatus(complaintId, {
+        status: newStatus,
+        adminComment
+      });
+      setComplaint(updatedComplaint);
+      setShowUpdateForm(false);
+      setAdminComment('');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setStatusUpdateLoading(false);
+    }
+  };
+
+  const statusOptions = [
+    { value: 'submitted', label: 'Submitted', color: 'bg-gray-300' },
+    { value: 'under_review', label: 'Under Review', color: 'bg-blue-300' },
+    { value: 'in_progress', label: 'In Progress', color: 'bg-yellow-300' },
+    { value: 'resolved', label: 'Resolved', color: 'bg-green-300' },
+    { value: 'rejected', label: 'Rejected', color: 'bg-red-300' }
+  ];
+
+  if (loading) return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+        <p className="font-bold">Error</p>
+        <p>{error}</p>
+      </div>
+      <button 
+        onClick={() => navigate(-1)}
+        className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded"
+      >
+        Go Back
+      </button>
+    </div>
+  );
+
+  if (!complaint) return (
+    <div className="max-w-4xl mx-auto p-6 text-center">
+      <h2 className="text-2xl font-bold mb-4">No complaint found</h2>
+      <button 
+        onClick={() => navigate('/submit-complaint')}
+        className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg"
+      >
+        Submit New Complaint
+      </button>
+    </div>
+  );
 
   return (
-    <div className="track-complaint-page">
-      <h1>Track Your Complaint</h1>
-      <div className="complaint-details">
-        <h2>{complaint.category}</h2>
-        <p><strong>Description:</strong> {complaint.description}</p>
-        <p><strong>Location:</strong> {complaint.location.address || 'Not specified'}</p>
-        <p><strong>Date Reported:</strong> {new Date(complaint.timestamp).toLocaleString()}</p>
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Track Your Complaint</h1>
+      
+      {/* Complaint Details Card */}
+      <div className="bg-gray-50 p-6 rounded-lg shadow-sm mb-8">
+        <div className="flex flex-col md:flex-row md:items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-800 capitalize mr-4">
+            {complaint.category}
+          </h2>
+          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+            statusOptions.find(s => s.value === complaint.status)?.color || 'bg-gray-300'
+          }`}>
+            {statusOptions.find(s => s.value === complaint.status)?.label || complaint.status}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <p className="text-gray-600 font-medium">Description:</p>
+            <p className="text-gray-800">{complaint.description}</p>
+          </div>
+          <div>
+            <p className="text-gray-600 font-medium">Location:</p>
+            <p className="text-gray-800">
+              {complaint.location.address || 'Not specified'}
+              {complaint.location.latitude && (
+                <span className="block text-sm text-gray-500">
+                  ({complaint.location.latitude.toFixed(6)}, {complaint.location.longitude.toFixed(6)})
+                </span>
+              )}
+            </p>
+          </div>
+          <div>
+            <p className="text-gray-600 font-medium">Date Reported:</p>
+            <p className="text-gray-800">
+              {new Date(complaint.timestamp).toLocaleString()}
+            </p>
+          </div>
+          <div>
+            <p className="text-gray-600 font-medium">Complaint ID:</p>
+            <p className="text-gray-800 font-mono">{complaint.id}</p>
+          </div>
+        </div>
+
+        {complaint.image && (
+          <div className="mt-4">
+            <p className="text-gray-600 font-medium mb-2">Evidence:</p>
+            <img 
+              src={complaint.image} 
+              alt="Complaint evidence" 
+              className="max-w-full h-auto max-h-64 rounded-lg border border-gray-200"
+            />
+          </div>
+        )}
       </div>
-      
-      <StatusTracker status={complaint.status} />
-      
-      <div className="estimated-resolution">
-        <h3>Estimated Resolution Time</h3>
-        <p>Based on similar issues, we expect to resolve this within 7-10 business days</p>
+
+      {/* Status Tracker */}
+      <div className="mb-8">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Status Progress</h3>
+        <StatusTracker status={complaint.status} />
       </div>
-      
-      {complaint.image && (
-        <div className="complaint-image">
-          <img 
-            src={complaint.image} 
-            alt="Complaint evidence" 
-            style={{ maxWidth: '100%', maxHeight: '300px' }}
-          />
+
+      {/* Resolution Estimate */}
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-8">
+        <h3 className="text-lg font-semibold text-blue-800 mb-2">Estimated Resolution Time</h3>
+        <p className="text-blue-700">
+          Based on similar issues, we expect to resolve this within 7-10 business days
+        </p>
+      </div>
+
+      {/* Admin Section (Conditional) */}
+      {complaint.adminComment && (
+        <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200 mb-8">
+          <h3 className="text-lg font-semibold text-yellow-800 mb-2">Admin Note</h3>
+          <p className="text-yellow-700">{complaint.adminComment}</p>
         </div>
       )}
+
+      {/* Status Update Form (For Admins) */}
+      {showUpdateForm && (
+        <div className="bg-gray-100 p-4 rounded-lg mb-8">
+          <h3 className="text-lg font-semibold mb-3">Update Status</h3>
+          <form onSubmit={handleStatusUpdate}>
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">New Status</label>
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+              >
+                {statusOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">Comment (Optional)</label>
+              <textarea
+                value={adminComment}
+                onChange={(e) => setAdminComment(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded"
+                rows="3"
+                placeholder="Add any additional notes..."
+              />
+            </div>
+            <div className="flex space-x-3">
+              <button
+                type="submit"
+                disabled={statusUpdateLoading}
+                className={`px-4 py-2 rounded text-white ${
+                  statusUpdateLoading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+              >
+                {statusUpdateLoading ? 'Updating...' : 'Update Status'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowUpdateForm(false)}
+                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div className="flex flex-wrap gap-3">
+        <button
+          onClick={() => navigate(-1)}
+          className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded"
+        >
+          Back to List
+        </button>
+        <button
+          onClick={() => setShowUpdateForm(!showUpdateForm)}
+          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
+        >
+          {showUpdateForm ? 'Hide Update Form' : 'Update Status'}
+        </button>
+      </div>
     </div>
   );
 };

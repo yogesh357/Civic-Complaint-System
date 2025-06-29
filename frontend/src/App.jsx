@@ -16,6 +16,7 @@ import OfficerLogin from './components/OfficerLogin';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Test from './components/Test';
+import LoginOptionsModal from './components/LoginOptionsModal';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <ComplaintProvider>
 
           <div className="App">
+            {/* <Navbar isAuthenticated={true} /> */}
             <Navbar />
             <div className="main-content">
               <Routes>
@@ -35,8 +37,9 @@ function App() {
                 <Route path="/citizen-login" element={<UserLogin />} />
                 <Route path="/officer-login" element={<OfficerLogin />} />
                 <Route path="/register" element={<Auth mode="register" />} />
-                <Route path="/test" element={<Test />} />
+                <Route path="/login-options" element={<LoginOptionsModal />} />
 
+                <Route path="/test" element={<Test />} />
               </Routes>
             </div>
           </div>

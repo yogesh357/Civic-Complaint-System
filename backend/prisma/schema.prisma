@@ -1,0 +1,111 @@
+// generator client {
+//   provider = "prisma-client-js"
+//   // output   = "../generated/prisma"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// model User {
+//   id        Int       @id @default(autoincrement())
+//   username  String    @unique
+//   email     String    @unique
+//   mobileNo  String?   @unique
+//   password String
+//   location Location[] 
+//   createdAt DateTime  @default(now())
+// }
+
+// model Location {
+//   id      Int    @id @default(autoincrement())
+//   street  String
+//   city    String
+//   state   String
+//   zipCode String
+//   userId  Int
+//   user    User   @relation(fields: [userId], references: [id])  
+// }
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums for Roles, Status, and Categories
+enum Role {
+  ADMIN
+  USER
+  STAFF // Optional for futur
+}
+
+enum Status {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
+}
+
+enum Category {
+  ROADS
+  WATER
+  ELECTRICITY
+  WASTE
+  PUBLIC_SAFETY
+  OTHER
+}
+
+// model User {
+//   id         Int         @id @default(autoincrement())
+//   name       String?
+//   email      String      @unique
+//   password   String
+//   role       Role        @default(USER)
+//   complaints Complaint[]
+//   createdAt  DateTime    @default(now())
+//   updatedAt  DateTime    @updatedAt
+// }
+model User {
+  id       Int     @id @default(autoincrement())
+  name     String?
+  email    String  @unique
+  password String
+  role     Role    @default(USER)
+
+  // Admin-specific fields
+  department   String? // For admin organization
+  permissions  String[] // For granular permissions
+  isSuperAdmin Boolean  @default(false) // For root admin
+
+  // Common fields
+  complaints Complaint[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+// Complaint Model (core entity)
+model Complaint {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  location    String?
+  imageUrl    String? // Store image path or URL
+  status      Status   @default(PENDING)
+  category    Category
+  userId      Int // Who submitted the complaint
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Admin {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+}

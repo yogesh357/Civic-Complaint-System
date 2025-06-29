@@ -12,7 +12,7 @@ const ComplaintList = ({ complaints, onSelect }) => {
 
   return (
     <div className="complaint-list">
-      <h3>Recent Complaints</h3>
+      {/* <h3>Recent Complaints</h3> */}
       <div className="list-container">
         {complaints.map((complaint, index) => (
           <div 

@@ -1,190 +1,44 @@
-// import React, { useState } from 'react';
-// import { useGeolocation } from '../services/geolocation';
-
-// const ComplaintForm = ({ onSubmit }) => {
-//   const [category, setCategory] = useState('pothole');
-//   const [description, setDescription] = useState('');
-//   const [image, setImage] = useState(null);
-//   const [useManualLocation, setUseManualLocation] = useState(false);
-//   const [manualCoords, setManualCoords] = useState('');
-//   const { location, error: locationError, isLoading } = useGeolocation();
-
-//   const categories = [
-//     'pothole', 'streetlight', 'garbage', 'water', 'sewage', 'road', 'other'
-//   ];
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-
-//     let finalLocation = location;
-
-//     if (useManualLocation && manualCoords) {
-//       const [lat, lng] = manualCoords.split(',').map(coord => parseFloat(coord.trim()));
-//       if (!isNaN(lat) && !isNaN(lng)) {
-//         finalLocation = { latitude: lat, longitude: lng };
-//       } else {
-//         alert('Please enter valid coordinates in "latitude,longitude" format');
-//         return;
-//       }
-//     }
-
-//     if (!finalLocation) {
-//       alert('Please provide a location for your complaint');
-//       return;
-//     }
-
-//     const complaint = {
-//       category,
-//       description,
-//       location: finalLocation,
-//       image,
-//       timestamp: new Date().toISOString()
-//     };
-//     onSubmit(complaint);
-//   };
-
-//   return (
-//     <div className="mx-auto bg-gray-100  w-full ">
-//       <h2 className='text-xl font-bold px-20  mx-auto py-5'>Report an Issue</h2>
-//       <form
-//         className='px-20 py-10'
-//         onSubmit={handleSubmit}>
-//         <div className="form-group ">
-//           <label>Issue Type</label>
-//           <select
-//             className='bg-gray-200 mt-5'
-//             value={category}
-//             onChange={(e) => setCategory(e.target.value)}
-//             required
-//           >
-//             {categories.map(cat => (
-//               <option key={cat} value={cat}>{cat}</option>
-//             ))}
-//           </select>
-//         </div>
-
-//         <div className="form-group">
-//           <label>Description</label>
-//           <textarea
-//             className='bg-gray-200 mt-5'
-//             value={description}
-//             onChange={(e) => setDescription(e.target.value)}
-//             required
-//             placeholder="Please describe the issue in detail..."
-//           />
-//         </div>
-
-//         <div className="form-group">
-//           <label>Upload Photo (Optional)</label>
-//           <input
-//             className='bg-gray-200 mt-5'
-//             type="file"
-//             accept="image/*"
-//             onChange={(e) => setImage(e.target.files[0])}
-//           />
-//         </div>
-
-//         <div className="location-section">
-//           <h3>Location Information</h3>
-
-//           {isLoading ? (
-//             <p>Detecting your location...</p>
-//           ) : locationError ? (
-//             <div className="location-error">
-//               <p className="error-message">⚠️ {locationError}</p>
-//               <div className="manual-location-fallback">
-//                 <label>
-//                   <input
-//                     type="checkbox"
-//                     checked={useManualLocation}
-//                     onChange={(e) => setUseManualLocation(e.target.checked)}
-//                   />
-//                   Enter location manually
-//                 </label>
-
-//                 {useManualLocation && (
-//                   <div className="manual-coords-input">
-//                     <input
-//                       className='bg-gray-200 mt-5'
-//                       type="text"
-//                       value={manualCoords}
-//                       onChange={(e) => setManualCoords(e.target.value)}
-//                       placeholder="e.g., 51.505,-0.09"
-//                       required
-//                     />
-//                     <small>Enter latitude,longitude coordinates</small>
-//                   </div>
-//                 )}
-//               </div>
-//             </div>
-//           ) : location && (
-//             <div className="location-info">
-//               <p>Detected location: {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}</p>
-//               <label>
-//                 <input
-//                   className='mt-5'
-//                   type="checkbox"
-//                   checked={useManualLocation}
-//                   onChange={(e) => setUseManualLocation(e.target.checked)}
-//                 />
-//                 Use different location
-//               </label>
-//               {useManualLocation && (
-//                 <div className="manual-coords-input">
-//                   <input
-//                     className='bg-gray-200 mt-5'
-//                     type="text"
-//                     value={manualCoords}
-//                     onChange={(e) => setManualCoords(e.target.value)}
-//                     placeholder="e.g., 51.505,-0.09"
-//                     required
-//                   />
-//                 </div>
-//               )}
-//             </div>
-//           )}
-//         </div>
-
-//         <button type="submit" className="submit-btn" disabled={isLoading}>
-//           {isLoading ? 'Submitting...' : 'Submit Complaint'}
-//         </button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default ComplaintForm;
 import React, { useState } from 'react';
 import { useGeolocation } from '../services/geolocation';
-import LocationPicker from './LocationPicker';
 
 const ComplaintForm = ({ onSubmit }) => {
   const [category, setCategory] = useState('pothole');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState(null);
-  const [useManualLocation, setUseManualLocation] = useState(false);
-  const [manualCoords, setManualCoords] = useState('');
+  const [previewImage, setPreviewImage] = useState(null);
+  const [address, setAddress] = useState({
+    street: '',
+    area: '',
+    landmark: '',
+    city: '',
+    pincode: ''
+  });
   const { location, error: locationError, isLoading } = useGeolocation();
 
   const categories = [
     'pothole', 'streetlight', 'garbage', 'water', 'sewage', 'road', 'other'
   ];
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setPreviewImage(URL.createObjectURL(file));
+    }
+  };
+
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setAddress(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    let finalLocation = location;
- 
-    if (useManualLocation && manualCoords) {
-      const [lat, lng] = manualCoords.split(',').map(coord => parseFloat(coord.trim()));
-      if (!isNaN(lat) && !isNaN(lng)) {
-        finalLocation = { latitude: lat, longitude: lng };
-      } else {
-        alert('Please enter valid coordinates in "latitude,longitude" format');
-        return;
-      }
-    }
 
-    if (!finalLocation) {
+    if (!location && !address.street) {
       alert('Please provide a location for your complaint');
       return;
     }
@@ -192,7 +46,10 @@ const ComplaintForm = ({ onSubmit }) => {
     const complaint = {
       category,
       description,
-      location: finalLocation,
+      location: {
+        ...location,
+        address: `${address.street}, ${address.area}, ${address.landmark}, ${address.city}, ${address.pincode}`
+      },
       image,
       timestamp: new Date().toISOString()
     };
@@ -200,15 +57,15 @@ const ComplaintForm = ({ onSubmit }) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-8 my-10 z-10 shadow-black">
+    <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-8 my-10">
       <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Report an Issue</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Category */}
         <div>
-          <label className="block text-gray-700 font-semibold mb-2">Issue Type</label>
+          <label className="block text-gray-700 font-medium mb-2">Issue Type*</label>
           <select
-            className="w-full p-2 bg-gray-100 rounded border border-gray-300"
+            className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             required
@@ -221,9 +78,9 @@ const ComplaintForm = ({ onSubmit }) => {
 
         {/* Description */}
         <div>
-          <label className="block text-gray-700 font-semibold mb-2">Description</label>
+          <label className="block text-gray-700 font-medium mb-2">Description*</label>
           <textarea
-            className="w-full p-2 h-28 bg-gray-100 rounded border border-gray-300 resize-none"
+            className="w-full p-3 h-32 bg-gray-50 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
@@ -231,89 +88,143 @@ const ComplaintForm = ({ onSubmit }) => {
           />
         </div>
 
-        {/* Upload */}
+        {/* Image Upload */}
         <div>
-          <label className="block text-gray-700 font-semibold mb-2">Upload Photo (Optional)</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files[0])}
-            className="w-full bg-gray-100 border border-gray-300 rounded p-2"
-          />
+          <label className="block text-gray-700 font-medium mb-2">Upload Photo</label>
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                id="image-upload"
+              />
+              <label
+                htmlFor="image-upload"
+                className="inline-block px-4 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 cursor-pointer"
+              >
+                Choose File
+              </label>
+            </div>
+            {previewImage && (
+              <div className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                <img
+                  src={previewImage}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+          </div>
+          <p className="mt-1 text-sm text-gray-500">Max file size: 5MB</p>
         </div>
 
-        {/* Location Info */}
-        <div className="bg-gray-50 border border-gray-200 p-4 rounded-md">
-          <h3 className="text-lg font-medium text-gray-800 mb-3">Location Information</h3>
+        {/* Location Section */}
+        <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
+          <h3 className="text-lg font-medium text-gray-800 mb-4">Location Details*</h3>
 
           {isLoading ? (
-            <p className="text-yellow-600">Detecting your location...</p>
+            <div className="flex items-center text-blue-600">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Detecting your location...
+            </div>
           ) : locationError ? (
-            <div>
-              <p className="text-red-600 font-medium mb-2">⚠️ {locationError}</p>
-              <label className="block mb-2">
-                <input
-                  type="checkbox"
-                  className="mr-2"
-                  checked={useManualLocation}
-                  onChange={(e) => setUseManualLocation(e.target.checked)}
-                />
-                Enter location manually
-              </label>
-
-              {useManualLocation && (
-                <div>
-                  {/* <input
-                    type="text"
-                    value={manualCoords}
-                    onChange={(e) => setManualCoords(e.target.value)}
-                    placeholder="e.g., 51.505,-0.09"
-                    className="w-full p-2 bg-gray-100 rounded border border-gray-300"
-                    required
-                  />
-                  <small className="text-sm text-gray-500">Enter latitude,longitude coordinates</small> */}
-                  <LocationPicker/>
-                </div>
-              )}
+            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-md">
+              ⚠️ {locationError}
             </div>
           ) : location && (
-            <div>
-              <p className="text-green-700 font-medium mb-2">
-                Detected location: {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
-              </p>
-
-              <label className="block mb-2">
-                <input
-                  type="checkbox"
-                  className="mr-2"
-                  checked={useManualLocation}
-                  onChange={(e) => setUseManualLocation(e.target.checked)}
-                />
-                Use different location
-              </label>
-
-              {useManualLocation && (
-                <input
-                  type="text"
-                  value={manualCoords}
-                  onChange={(e) => setManualCoords(e.target.value)}
-                  placeholder="e.g., 51.505,-0.09"
-                  className="w-full p-2 bg-gray-100 rounded border border-gray-300"
-                  required
-                />
-              )}
+            <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-md">
+              ✅ Location detected: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
             </div>
           )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-1">Street*</label>
+              <input
+                type="text"
+                name="street"
+                value={address.street}
+                onChange={handleAddressChange}
+                className="w-full p-3 bg-white rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+                placeholder="Street name and number"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-1">Area*</label>
+              <input
+                type="text"
+                name="area"
+                value={address.area}
+                onChange={handleAddressChange}
+                className="w-full p-3 bg-white rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+                placeholder="Neighborhood or locality"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-1">Landmark</label>
+              <input
+                type="text"
+                name="landmark"
+                value={address.landmark}
+                onChange={handleAddressChange}
+                className="w-full p-3 bg-white rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Nearby prominent location"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-1">City*</label>
+              <input
+                type="text"
+                name="city"
+                value={address.city}
+                onChange={handleAddressChange}
+                className="w-full p-3 bg-white rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+                placeholder="City or town"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-1">Pincode*</label>
+              <input
+                type="text"
+                name="pincode"
+                value={address.pincode}
+                onChange={handleAddressChange}
+                className="w-full p-3 bg-white rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+                placeholder="Postal code"
+                pattern="\d{6}"
+                title="6-digit pincode"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Submit */}
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={isLoading}
-          className={`w-full py-3 px-6 rounded text-white font-semibold ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
-            } transition duration-200`}
+          className={`w-full py-3 px-6 rounded-lg text-white font-semibold text-lg ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+            } transition duration-200 shadow-md`}
         >
-          {isLoading ? 'Submitting...' : 'Submit Complaint'}
+          {isLoading ? (
+            <span className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Submitting...
+            </span>
+          ) : (
+            'Submit Complaint'
+          )}
         </button>
       </form>
     </div>

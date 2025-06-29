@@ -1,10 +1,15 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
+import LoginOptionsModal from './LoginOptionsModal';
 
 const Navbar = ({ isAuthenticated }) => {
 
-  const {userType} = useAuthContext()
+  const { userType, } = useAuthContext();
+  const navigate = useNavigate()
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <nav className="bg-white shadow-md px-6 py-4 flex justify-between items-center text-slate-800">
@@ -50,11 +55,34 @@ const Navbar = ({ isAuthenticated }) => {
             Logout
           </button>
         ) : (
-          <button
-            className="ml-4 bg-indigo-600 text-white px-4 py-1 rounded hover:bg-indigo-700 transition"
-          >
-            Login
-          </button>
+          // <button
+          //   onClick={() => {
+          //     setIsOpen(true);
+          //     navigate('/login-options')
+          //   }}
+          //   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+
+          // >
+          //   {/* <button
+          //   className="ml-4 bg-indigo-600 text-white px-4 py-1 rounded hover:bg-indigo-700 transition"
+          //   > */}
+          //   Login
+          // </button>
+          <div>
+
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Login
+            </button>
+
+            <LoginOptionsModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+            />
+          </div>
+
         )}
       </div>
     </nav>
