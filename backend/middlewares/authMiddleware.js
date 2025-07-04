@@ -1,25 +1,12 @@
-import jwt from 'jsonwebtoken'
- 
-
-// export const isAdmin = (req, res, next) => {
-//     // Assuming user is attached to request after authentication
-//     if (!req.user || (req.user.role !== 'ADMIN' && !req.user.isSuperAdmin)) {
-//         return res.status(403).json({
-//             success: false,
-//             message: 'Forbidden: Admin privileges required'
-//         });
-//     }
-//     next();
-// };
-
+import jwt from 'jsonwebtoken';
 
 /**
- * Authentication middleware that verifies JWT tokens and checks admin privileges
- */
-export const authenticateAdmin = (req, res, next) => {
+ * Authentication middleware for admin routes
+ */export const authenticateAdmin = (req, res, next) => {
     try {
-        // 1. Get token from header
-        const token = req.header('Authorization')?.replace('Bearer ', '');
+        // 1. Get token from either cookies or Authorization header
+        const token = req.cookies?.token ||
+            req.headers?.authorization?.split(' ')[1];
 
         if (!token) {
             return res.status(401).json({
@@ -29,19 +16,36 @@ export const authenticateAdmin = (req, res, next) => {
         }
 
         // 2. Verify token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            // Handle specific JWT errors
+            if (err instanceof jwt.TokenExpiredError) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Token expired'
+                });
+            }
+            if (err instanceof jwt.JsonWebTokenError) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Invalid token'
+                });
+            }
+            throw err;
+        }
 
         // 3. Validate token structure
-        if (!decoded.userId || !decoded.role) {
+        if (!decoded?.userId || !decoded?.role) {
             return res.status(401).json({
                 success: false,
-                message: 'Invalid token structure'
+                message: 'Token missing required fields'
             });
         }
 
         // 4. Check admin privileges
-        const validAdminRoles = ['ADMIN', 'SUPER_ADMIN'];
-        if (!validAdminRoles.includes(decoded.role)) {
+        if (decoded.role !== 'ADMIN') {
             return res.status(403).json({
                 success: false,
                 message: 'Admin privileges required'
@@ -51,43 +55,38 @@ export const authenticateAdmin = (req, res, next) => {
         // 5. Attach user to request
         req.user = {
             userId: decoded.userId,
-            role: decoded.role,
-            isSuperAdmin: decoded.isSuperAdmin || false
+            role: decoded.role
         };
 
         next();
 
     } catch (error) {
-        // Handle different JWT error cases
-        let message = 'Authentication failed';
-        if (error instanceof jwt.TokenExpiredError) {
-            message = 'Token expired';
-        } else if (error instanceof jwt.JsonWebTokenError) {
-            message = 'Invalid token';
-        }
-
-        res.status(401).json({
+        console.error('Authentication error:', error);
+        res.status(500).json({
             success: false,
-            message
+            message: 'Internal server error during authentication'
         });
     }
 };
 
-
+/**
+ * Role checker middleware (simplified for ADMIN/USER only)
+ */
 export const checkRole = (allowedRoles) => {
     return (req, res, next) => {
-        if (!req.user || !allowedRoles.includes(req.user.role)) {
+        if (!allowedRoles.includes(req.user.role)) {
             return res.status(403).json({
                 success: false,
-                message: `Forbidden: Requires one of these roles: ${allowedRoles.join(', ')}`
+                message: `Forbidden: Requires role: ${allowedRoles.join(' or ')}`
             });
         }
         next();
     };
 };
 
-
-
+/**
+ * Request validation middleware (unchanged)
+ */
 export const validateRequest = (schema) => {
     return (req, res, next) => {
         try {

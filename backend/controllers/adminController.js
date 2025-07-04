@@ -1,17 +1,14 @@
 import prisma from '../config/prisma.js';
-import { ForbiddenError } from '../errors/index.js';
-
-import prisma from '../config/prisma.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { ValidationError, ForbiddenError } from '../errors/index.js';
 
 // Admin Login
-export const loginAdmin = async (req, res, next) => {
+export const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
-        // 1. Find admin user
+        // Find admin user
         const admin = await prisma.user.findUnique({
             where: { email },
             select: {
@@ -20,15 +17,12 @@ export const loginAdmin = async (req, res, next) => {
                 email: true,
                 password: true,
                 role: true,
-                department: true,
-                permissions: true,
-                isSuperAdmin: true,
                 isActive: true
             }
         });
 
-        // 2. Validate admin
-        if (!admin || !['ADMIN', 'SUPER_ADMIN'].includes(admin.role)) {
+        // Validate admin
+        if (!admin || admin.role !== 'ADMIN') {
             throw new ValidationError('Invalid admin credentials');
         }
 
@@ -36,26 +30,29 @@ export const loginAdmin = async (req, res, next) => {
             throw new ForbiddenError('Admin account is deactivated');
         }
 
-        // 3. Verify password
+        // Verify password
         const isMatch = await bcrypt.compare(password, admin.password);
         if (!isMatch) {
             throw new ValidationError('Invalid credentials');
         }
 
-        // 4. Generate JWT
+        // Generate JWT
         const token = jwt.sign(
             {
                 userId: admin.id,
-                role: admin.role,
-                department: admin.department,
-                permissions: admin.permissions,
-                isSuperAdmin: admin.isSuperAdmin
+                role: admin.role
             },
             process.env.JWT_SECRET,
             { expiresIn: '8h' }
         );
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
 
-        // 5. Return response (excluding password)
+        // Return response (excluding password)
         const { password: _, ...adminData } = admin;
         res.json({
             success: true,
@@ -68,42 +65,29 @@ export const loginAdmin = async (req, res, next) => {
     }
 };
 
-// Admin Registration (Super Admin only)
-export const registerAdmin = async (req, res, next) => {
+// Admin Registration (Only for initial setup)
+export const createFirstAdmin = async (req, res, next) => {
     try {
-        const { name, email, password, role, department, permissions } = req.body;
+        const { name, email, password } = req.body;
 
-        // 1. Authorization check
-        if (!req.user.isSuperAdmin) {
-            throw new ForbiddenError('Only super admins can register new admins');
+        // Check if any admin exists
+        const existingAdmin = await prisma.user.findFirst({
+            where: { role: 'ADMIN' }
+        });
+
+        if (existingAdmin) {
+            throw new ForbiddenError('Admin already exists');
         }
 
-        // 2. Validate role
-        const validRoles = ['ADMIN', 'STAFF_ADMIN'];
-        if (!validRoles.includes(role)) {
-            throw new ValidationError(`Invalid role. Allowed: ${validRoles.join(', ')}`);
-        }
+        // Create first admin
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 3. Check email exists
-        const exists = await prisma.user.findUnique({ where: { email } });
-        if (exists) {
-            throw new ValidationError('Email already registered');
-        }
-
-        // 4. Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        // 5. Create admin
-        const newAdmin = await prisma.user.create({
+        const admin = await prisma.user.create({
             data: {
                 name,
                 email,
                 password: hashedPassword,
-                role,
-                department,
-                permissions: permissions || [],
-                isSuperAdmin: false, // Can only be set manually in DB
+                role: 'ADMIN',
                 isActive: true
             },
             select: {
@@ -111,15 +95,95 @@ export const registerAdmin = async (req, res, next) => {
                 name: true,
                 email: true,
                 role: true,
-                department: true,
-                permissions: true,
                 createdAt: true
             }
         });
 
+        // Generate token
+        const token = jwt.sign(
+            {
+                userId: admin.id,
+                role: admin.role,
+
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        )
+
+        // Set cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
         res.status(201).json({
             success: true,
-            message: 'Admin registered successfully',
+            message: 'Initial admin created successfully',
+            data: admin
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// register admin 
+export const register = async (req, res, next) => {
+    try {
+        const { name, email, password } = req.body;
+
+        // 1. Input validation
+        if (!name || !email || !password) {
+            throw new ValidationError('Name, email, and password are required');
+        }
+
+        // 2. Check if email exists
+        const existingUser = await prisma.user.findUnique({ where: { email } });
+        if (existingUser) {
+            throw new ValidationError('Email already registered');
+        }
+
+        // 3. Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // 4. Create admin
+        const newAdmin = await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                role: 'ADMIN',
+                isActive: true
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                createdAt: true
+            }
+        });
+
+        // 5. Generate token (NEW)
+        const token = jwt.sign(
+            { userId: newAdmin.id, role: newAdmin.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        // 6. Set HTTP-only cookie (NEW)
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            path: '/'
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'Admin registered and logged in successfully',
             data: newAdmin
         });
 
@@ -129,7 +193,8 @@ export const registerAdmin = async (req, res, next) => {
 };
 
 // Get current admin profile
-export const getAdminProfile = async (req, res, next) => {
+export const getProfile = async (req, res, next) => {
+    console.log('Request user ID:', req.user.userId);
     try {
         const admin = await prisma.user.findUnique({
             where: { id: req.user.userId },
@@ -138,48 +203,14 @@ export const getAdminProfile = async (req, res, next) => {
                 name: true,
                 email: true,
                 role: true,
-                department: true,
-                permissions: true,
-                isSuperAdmin: true,
-                createdAt: true
-            }
-        });
-
-        if (!admin) {
-            throw new ForbiddenError('Admin not found');
-        }
-
-        res.json({
-            success: true,
-            data: admin
-        });
-
-    } catch (error) {
-        next(error);
-    }
-};
-// Get current admin profile
-export const getProfile = async (req, res, next) => {
-    try {
-        // req.user should be set by your auth middleware
-        const admin = await prisma.user.findUnique({
-            where: {
-                id: req.user.userId,
-                role: { in: ['ADMIN', 'SUPER_ADMIN'] }
-            },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                department: true,
                 isActive: true,
-                isSuperAdmin: true,
                 createdAt: true
             }
         });
 
-        if (!admin) {
+        console.log('Fetched admin:', admin);
+
+        if (!admin || admin.role !== 'ADMIN') {
             throw new ForbiddenError('Admin not found');
         }
 
@@ -189,8 +220,7 @@ export const getProfile = async (req, res, next) => {
     }
 };
 
-
-// Get all complaints with advanced filtering
+// Get all complaints with filtering
 export const getAllComplaints = async (req, res, next) => {
     try {
         const { status, category, userId, fromDate, toDate } = req.query;
@@ -223,7 +253,7 @@ export const getAllComplaints = async (req, res, next) => {
     }
 };
 
-// Update complaint status (admin only)
+// Update complaint status
 export const updateComplaintStatus = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -245,71 +275,32 @@ export const updateComplaintStatus = async (req, res, next) => {
     }
 };
 
-// User management (list/create/update)
+// User management
 export const manageUsers = async (req, res, next) => {
     try {
-        // GET - List users
+        // GET - List users (non-admins only)
         if (req.method === 'GET') {
-            const { role, active } = req.query;
-
             const users = await prisma.user.findMany({
-                where: {
-                    role: role || undefined,
-                    isActive: active ? active === 'true' : undefined
-                },
+                where: { role: 'USER' },
                 select: {
                     id: true,
                     name: true,
                     email: true,
-                    role: true,
-                    department: true,
                     isActive: true,
                     createdAt: true
                 }
             });
-
             return res.json({ success: true, data: users });
-        }
-
-        // POST - Create staff accounts
-        if (req.method === 'POST') {
-            const { name, email, password, department } = req.body;
-
-            // Only super admins can create staff
-            if (!req.user.isSuperAdmin) {
-                throw new ForbiddenError('Only super admins can create staff');
-            }
-
-            const staff = await prisma.user.create({
-                data: {
-                    name,
-                    email,
-                    password, // Should be hashed in real implementation
-                    role: 'STAFF',
-                    department
-                }
-            });
-
-            return res.status(201).json({ success: true, data: staff });
         }
 
         // PATCH - Update users
         if (req.method === 'PATCH') {
             const { id } = req.params;
-            const { role, isActive, department } = req.body;
-
-            // Prevent modifying super admins unless you're a super admin
-            const targetUser = await prisma.user.findUnique({
-                where: { id: parseInt(id) }
-            });
-
-            if (targetUser.isSuperAdmin && !req.user.isSuperAdmin) {
-                throw new ForbiddenError('Cannot modify super admin');
-            }
+            const { isActive } = req.body;
 
             const updatedUser = await prisma.user.update({
-                where: { id: parseInt(id) },
-                data: { role, isActive, department }
+                where: { id: parseInt(id), role: 'USER' },
+                data: { isActive }
             });
 
             return res.json({ success: true, data: updatedUser });
@@ -326,7 +317,7 @@ export const getDashboardStats = async (req, res, next) => {
         const [totalComplaints, resolvedComplaints, usersCount] = await Promise.all([
             prisma.complaint.count(),
             prisma.complaint.count({ where: { status: 'RESOLVED' } }),
-            prisma.user.count()
+            prisma.user.count({ where: { role: 'USER' } })
         ]);
 
         res.json({
@@ -334,7 +325,9 @@ export const getDashboardStats = async (req, res, next) => {
             data: {
                 totalComplaints,
                 resolvedComplaints,
-                resolutionRate: (resolvedComplaints / totalComplaints * 100).toFixed(2),
+                resolutionRate: totalComplaints > 0
+                    ? (resolvedComplaints / totalComplaints * 100).toFixed(2)
+                    : 0,
                 usersCount
             }
         });
@@ -342,3 +335,4 @@ export const getDashboardStats = async (req, res, next) => {
         next(error);
     }
 };
+ 

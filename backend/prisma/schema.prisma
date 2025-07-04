@@ -41,6 +41,7 @@ datasource db {
 enum Role {
   ADMIN
   USER
+  SUPER_ADMIN
   STAFF // Optional for futur
 }
 
@@ -78,11 +79,7 @@ model User {
   role     Role    @default(USER)
 
   // Admin-specific fields
-  department   String? // For admin organization
-  permissions  String[] // For granular permissions
-  isSuperAdmin Boolean  @default(false) // For root admin
-
-  // Common fields
+  isActive   Boolean     @default(true)
   complaints Complaint[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
