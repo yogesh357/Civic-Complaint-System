@@ -3,10 +3,17 @@ import cloudinary from '../config/cloudinary.js';
 import { NotFoundError, ForbiddenError } from '../errors/index.js';
 
 // Create a new complaint
-export const addComplaint = async (req, res) => {
+export const addComplaint = async (req, res, next) => {
     try {
         const { title, description, location, category } = req.body;
-        const { userId } = req.user;
+        const userId = req.user?.id || req.user?.userId;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "User authentication invalid"
+            });
+        }
 
         let imageUrl = null;
         if (req.file) {
@@ -22,9 +29,14 @@ export const addComplaint = async (req, res) => {
                 description,
                 location,
                 imageUrl,
-                status: 'Pending',
+                status: 'PENDING',
                 category,
-                userId,
+                userId: Number(userId)
+                // user: {
+                //     connect: {
+                //         id: Number(userId) // Relation connection
+                //     }
+                // }
             },
             select: {
                 id: true,
@@ -34,16 +46,28 @@ export const addComplaint = async (req, res) => {
                 status: true,
                 category: true,
                 imageUrl: true,
-                createdAt: true,
+                createdAt: true
             }
         });
 
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
-            data: complaint,
+            data: complaint
         });
+
     } catch (error) {
-        next(error);
+        if (error.code === 'P2025') {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        console.error('Complaint creation error:', error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
     }
 };
 
@@ -80,13 +104,29 @@ export const getUserComplaints = async (req, res, next) => {
 };
 
 // Get single complaint details
+
 export const getComplaintDetails = async (req, res, next) => {
     try {
-        const { id } = req.params;
+        // 1. Safely extract and validate the complaint ID
+        const complaintId = typeof req.params.id === 'string'
+            ? parseInt(req.params.id, 10)
+            : NaN;
+
+        if (isNaN(complaintId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid complaint ID format - must be a number"
+            });
+        }
+
+        // 2. Get authenticated user ID
         const { userId } = req.user;
 
+        // 3. Fetch the complaint - FIXED: Using complaintId instead of id
         const complaint = await prisma.complaint.findUnique({
-            where: { id },
+            where: {
+                id: complaintId
+            },
             select: {
                 id: true,
                 title: true,
@@ -109,10 +149,11 @@ export const getComplaintDetails = async (req, res, next) => {
             throw new ForbiddenError('Not authorized to access this complaint');
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: complaint,
         });
+
     } catch (error) {
         next(error);
     }
@@ -121,7 +162,17 @@ export const getComplaintDetails = async (req, res, next) => {
 // Update a complaint
 export const updateComplaint = async (req, res, next) => {
     try {
-        const { id } = req.params;
+        const id = typeof req.params.id === 'string'
+            ? parseInt(req.params.id, 10)
+            : NaN;
+
+        if (isNaN(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid complaint ID format - must be a number"
+            });
+        }
+
         const { userId } = req.user;
         const { title, description, location, status, category } = req.body;
 
@@ -172,7 +223,10 @@ export const updateComplaint = async (req, res, next) => {
 // Delete a complaint
 export const deleteComplaint = async (req, res, next) => {
     try {
-        const { id } = req.params;
+        const id = typeof req.params.id === 'string'
+            ? parseInt(req.params.id, 10)
+            : NaN;
+
         const { userId } = req.user;
 
         // Check if complaint exists and belongs to user

@@ -1,160 +1,340 @@
 
+// // import { PrismaClient } from '@prisma/client';
+// // import prisma from '@prisma/client';
+// // import jwt from 'jsonwebtoken'
+// // import bcrypt from 'bcryptjs';
+
+// // export const register = async (req, res) => {
+// //     try {
+// //         const { name, email,  password } = req.body
+// //         if (!name || !email || !mobileNo || !password) {
+// //             return res.json({ success: false, message: 'Missing user Details' })
+// //         }
+// //         const existingUser = await prisma.user.findFirst({ name })
+
+// //         if (existingUser) {
+// //             return res.json({ success: false, message: 'User already exist' })
+// //         }
+// //         const hashedPassword = bcrypt.encodeBase64(password)
+// //         const user = await prisma.user.create({
+// //             data: {
+// //                 name,
+// //                 email, 
+// //                 password: hashedPassword
+// //             }
+// //         })
+// //         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+// //         res.cookie('token', token, {
+// //             httpOnly: true, //Prevent JawaScript to access cookie
+// //             secure: process.env.NODE_ENV === 'production', //Use secure cookies in production
+// //             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', //CSRF protection
+// //             maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration time
+// //         })
+
+// //         return res.json({ success: true, user: { email: user.email, name: user.name } })
+
+
+// //     } catch (error) {
+// //         console.log(error.message);
+// //         res.json({ success: false, message: error.message })
+// //     }
+// // }
+
+// // export const login = async (req, res) => {
+// //     try {
+// //         const { name, email, password } = req.body
+
+// //         if (!email || !password || !name) {
+// //             return res.json({ success: false, message: "Fill the required details" })
+// //         }
+// //         const user = await prisma.user.findFirst({ name });
+
+// //         if (!user) {
+// //             return res.json({ success: false, message: "Invalid Login Details" })
+// //         }
+// //         const isMatch = await bcrypt.compare(password, user.password)
+
+// //         if (!isMatch) {
+// //             return res.json({ success: false, message: "Invalid email or password" })
+// //         }
+
+// //         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+// //         res.cookie('token', token, {
+// //             httpOnly: true,
+// //             secure: process.env.NODE_ENV === 'production',
+// //             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+// //             maxAge: 7 * 24 * 60 * 60 * 1000,
+// //         })
+
+// //         return res.json({ success: true, user: { email: user.email, name: user.name } })
+
+
+// //     } catch (error) {
+// //         console.log(error.message);
+// //         res.json({ success: false, message: error.message })
+// //     }
+
+// // }
+
+// // export const isAuth = async (req, res) => {
+// //     try {
+// //         const { id: userId } = req.user;
+// //         const user = await prisma.user.findFirst(userId).select("-password");
+
+// //         if (!user) {
+// //             return res.json({ success: false, message: "User not found" });
+// //         }
+
+// //         return res.json({ success: true, user });
+// //     } catch (error) {
+// //         console.log(error.message);
+// //         res.json({ success: false, message: error.message });
+// //     }
+
+// // }
+
+// // export const logout = async (req, res) => {
+// //     try {
+// //         res.clearCookie('token', {
+// //             httpOnly: true,
+// //             secure: process.env.NODE_ENV === 'production',
+// //             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+// //         });
+// //         return res.json({ success: true, message: "Logged Out" })
+// //     } catch (error) {
+// //         console.log(error.message)
+// //         res.json({ success: false, message: error.message })
+// //     }
+// // }
+
 // import { PrismaClient } from '@prisma/client';
-// import prisma from '@prisma/client';
-// import jwt from 'jsonwebtoken'
+// import jwt from 'jsonwebtoken';
 // import bcrypt from 'bcryptjs';
 
+// // Initialize Prisma Client (FIXED: Your original had duplicate imports)
+// const prisma = new PrismaClient();
+
+// // --- REGISTER ---
 // export const register = async (req, res) => {
 //     try {
-//         const { username, email,  password } = req.body
-//         if (!username || !email || !mobileNo || !password) {
-//             return res.json({ success: false, message: 'Missing user Details' })
+//         const { name, email, password } = req.body;
+
+//         // Validation (FIXED: Removed undefined 'mobileNo')
+//         if (!name || !email || !password) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'name, email, and password are required'
+//             });
 //         }
-//         const existingUser = await prisma.user.findFirst({ username })
+
+//         // Check existing user (FIXED: Correct Prisma syntax)
+//         const existingUser = await prisma.user.findFirst({
+//             where: { OR: [{ name }, { email }] }
+//         });
 
 //         if (existingUser) {
-//             return res.json({ success: false, message: 'User already exist' })
+//             return res.status(409).json({
+//                 success: false,
+//                 message: 'name or email already exists'
+//             });
 //         }
-//         const hashedPassword = bcrypt.encodeBase64(password)
+
+//         // Hash password (FIXED: bcrypt.hash() instead of encodeBase64)
+//         const hashedPassword = await bcrypt.hash(password, 10);
+
+//         // Create user
 //         const user = await prisma.user.create({
-//             data: {
-//                 username,
-//                 email, 
-//                 password: hashedPassword
-//             }
-//         })
-//         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+//             data: { name, email, password: hashedPassword }
+//         });
 
+//         // Generate JWT (FIXED: Use user.id, not _id)
+//         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+//             expiresIn: '7d'
+//         });
+
+//         // Set cookie (correct as-is)
 //         res.cookie('token', token, {
-//             httpOnly: true, //Prevent JawaScript to access cookie
-//             secure: process.env.NODE_ENV === 'production', //Use secure cookies in production
-//             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', //CSRF protection
-//             maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration time
-//         })
+//             httpOnly: true,
+//             secure: process.env.NODE_ENV === 'production',
+//             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+//             maxAge: 7 * 24 * 60 * 60 * 1000,
+//         });
 
-//         return res.json({ success: true, user: { email: user.email, username: user.username } })
-
+//         return res.status(201).json({
+//             success: true,
+//             user: { id: user.id, email: user.email, name: user.name }
+//         });
 
 //     } catch (error) {
-//         console.log(error.message);
-//         res.json({ success: false, message: error.message })
+//         console.error('Registration error:', error);
+//         return res.status(500).json({
+//             success: false,
+//             message: 'Internal server error'
+//         });
 //     }
-// }
+// };
 
+// // --- LOGIN ---
 // export const login = async (req, res) => {
 //     try {
-//         const { username, email, password } = req.body
+//         const { email, password } = req.body;
 
-//         if (!email || !password || !username) {
-//             return res.json({ success: false, message: "Fill the required details" })
+//         if (!email || !password) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'Email and password are required'
+//             });
 //         }
-//         const user = await prisma.user.findFirst({ username });
+
+//         // Find user (FIXED: findUnique + where)
+//         const user = await prisma.user.findUnique({
+//             where: { email }
+//         });
 
 //         if (!user) {
-//             return res.json({ success: false, message: "Invalid Login Details" })
+//             return res.status(401).json({
+//                 success: false,
+//                 message: 'Invalid credentials'
+//             });
 //         }
-//         const isMatch = await bcrypt.compare(password, user.password)
 
+//         // Compare passwords
+//         const isMatch = await bcrypt.compare(password, user.password);
 //         if (!isMatch) {
-//             return res.json({ success: false, message: "Invalid email or password" })
+//             return res.status(401).json({
+//                 success: false,
+//                 message: 'Invalid credentials'
+//             });
 //         }
 
-//         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+//         // Generate JWT and set cookie (same as register)
+//         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+//             expiresIn: '7d'
+//         });
 
 //         res.cookie('token', token, {
 //             httpOnly: true,
 //             secure: process.env.NODE_ENV === 'production',
 //             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
 //             maxAge: 7 * 24 * 60 * 60 * 1000,
-//         })
+//         });
 
-//         return res.json({ success: true, user: { email: user.email, name: user.name } })
-
+//         return res.status(200).json({
+//             success: true,
+//             user: { id: user.id, email: user.email, name: user.name }
+//         });
 
 //     } catch (error) {
-//         console.log(error.message);
-//         res.json({ success: false, message: error.message })
+//         console.error('Login error:', error);
+//         return res.status(500).json({
+//             success: false,
+//             message: 'Internal server error'
+//         });
 //     }
+// };
 
-// }
-
+// // --- AUTH CHECK ---
 // export const isAuth = async (req, res) => {
 //     try {
-//         const { id: userId } = req.user;
-//         const user = await prisma.user.findFirst(userId).select("-password");
-
-//         if (!user) {
-//             return res.json({ success: false, message: "User not found" });
+//         if (!req.user?.id) {
+//             return res.status(401).json({
+//                 success: false,
+//                 message: 'Not authenticated'
+//             });
 //         }
 
-//         return res.json({ success: true, user });
+//         // Fetch user (FIXED: Correct select syntax)
+//         const user = await prisma.user.findUnique({
+//             where: { id: req.user.id },
+//             select: { id: true, email: true, name: true }
+//         });
+
+//         if (!user) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: 'User not found'
+//             });
+//         }
+
+//         return res.status(200).json({ success: true, user });
+
 //     } catch (error) {
-//         console.log(error.message);
-//         res.json({ success: false, message: error.message });
+//         console.error('Auth check error:', error);
+//         return res.status(500).json({
+//             success: false,
+//             message: 'Internal server error'
+//         });
 //     }
+// };
 
-// }
-
-// export const logout = async (req, res) => {
+// // --- LOGOUT ---
+// export const logout = (req, res) => {
 //     try {
 //         res.clearCookie('token', {
 //             httpOnly: true,
 //             secure: process.env.NODE_ENV === 'production',
 //             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
 //         });
-//         return res.json({ success: true, message: "Logged Out" })
+//         return res.status(200).json({
+//             success: true,
+//             message: 'Logged out successfully'
+//         });
 //     } catch (error) {
-//         console.log(error.message)
-//         res.json({ success: false, message: error.message })
+//         console.error('Logout error:', error);
+//         return res.status(500).json({
+//             success: false,
+//             message: 'Internal server error'
+//         });
 //     }
-// }
+// };
+
 
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-// Initialize Prisma Client (FIXED: Your original had duplicate imports)
 const prisma = new PrismaClient();
 
-// --- REGISTER ---
+// ================= REGISTER =================
 export const register = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { name, email, password } = req.body;
 
-        // Validation (FIXED: Removed undefined 'mobileNo')
-        if (!username || !email || !password) {
+        // Validation (fixed missing mobileNo issue)
+        if (!name || !email || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Username, email, and password are required'
+                message: 'Name, email, and password are required'
             });
         }
 
-        // Check existing user (FIXED: Correct Prisma syntax)
+        // Check existing user (fixed Prisma syntax)
         const existingUser = await prisma.user.findFirst({
-            where: { OR: [{ username }, { email }] }
+            where: { OR: [{ name }, { email }] }
         });
 
         if (existingUser) {
             return res.status(409).json({
                 success: false,
-                message: 'Username or email already exists'
+                message: 'User already exists'
             });
         }
 
-        // Hash password (FIXED: bcrypt.hash() instead of encodeBase64)
+        // Hash password (fixed bcrypt usage)
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create user
         const user = await prisma.user.create({
-            data: { username, email, password: hashedPassword }
+            data: { name, email, password: hashedPassword }
         });
 
-        // Generate JWT (FIXED: Use user.id, not _id)
+        // YOUR ORIGINAL COOKIE CODE (unchanged)
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
             expiresIn: '7d'
         });
 
-        // Set cookie (correct as-is)
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -162,25 +342,26 @@ export const register = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        return res.status(201).json({
+        return res.json({
             success: true,
-            user: { id: user.id, email: user.email, username: user.username }
+            user: { email: user.email, name: user.name }
         });
 
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error(error);
         return res.status(500).json({
             success: false,
-            message: 'Internal server error'
+            message: 'Registration failed'
         });
     }
 };
 
-// --- LOGIN ---
+// ================= LOGIN =================
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // Validation (removed redundant name check)
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -188,7 +369,7 @@ export const login = async (req, res) => {
             });
         }
 
-        // Find user (FIXED: findUnique + where)
+        // Find user (fixed Prisma syntax)
         const user = await prisma.user.findUnique({
             where: { email }
         });
@@ -209,7 +390,7 @@ export const login = async (req, res) => {
             });
         }
 
-        // Generate JWT and set cookie (same as register)
+        // YOUR ORIGINAL COOKIE CODE (unchanged)
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
             expiresIn: '7d'
         });
@@ -221,34 +402,26 @@ export const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        return res.status(200).json({
+        return res.json({
             success: true,
-            user: { id: user.id, email: user.email, username: user.username }
+            user: { email: user.email, name: user.name }
         });
 
     } catch (error) {
-        console.error('Login error:', error);
+        console.error(error);
         return res.status(500).json({
             success: false,
-            message: 'Internal server error'
+            message: 'Login failed'
         });
     }
 };
 
-// --- AUTH CHECK ---
+// ================= AUTH CHECK ================= 
 export const isAuth = async (req, res) => {
     try {
-        if (!req.user?.id) {
-            return res.status(401).json({
-                success: false,
-                message: 'Not authenticated'
-            });
-        }
-
-        // Fetch user (FIXED: Correct select syntax)
         const user = await prisma.user.findUnique({
             where: { id: req.user.id },
-            select: { id: true, email: true, username: true }
+            select: { id: true, email: true, name: true } // Fixed select syntax
         });
 
         if (!user) {
@@ -258,34 +431,34 @@ export const isAuth = async (req, res) => {
             });
         }
 
-        return res.status(200).json({ success: true, user });
+        return res.json({ success: true, user });
 
     } catch (error) {
-        console.error('Auth check error:', error);
+        console.error(error);
         return res.status(500).json({
             success: false,
-            message: 'Internal server error'
+            message: 'Authentication check failed'
         });
     }
 };
 
-// --- LOGOUT ---
+// ================= LOGOUT =================
 export const logout = (req, res) => {
     try {
+        // YOUR ORIGINAL COOKIE CLEARING CODE (unchanged)
         res.clearCookie('token', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
         });
-        return res.status(200).json({
-            success: true,
-            message: 'Logged out successfully'
-        });
+
+        return res.json({ success: true, message: 'Logged out' });
+
     } catch (error) {
-        console.error('Logout error:', error);
+        console.error(error);
         return res.status(500).json({
             success: false,
-            message: 'Internal server error'
+            message: 'Logout failed'
         });
     }
 };
