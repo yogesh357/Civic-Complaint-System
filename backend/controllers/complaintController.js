@@ -1,13 +1,19 @@
 import prisma from '../config/prisma.js';
 import cloudinary from '../config/cloudinary.js';
 import { NotFoundError, ForbiddenError } from '../errors/index.js';
+import { Category } from '@prisma/client'; 
 
 // Create a new complaint
 export const addComplaint = async (req, res, next) => {
     try {
         const { title, description, location, category } = req.body;
         const userId = req.user?.id || req.user?.userId;
-
+        const validCategories = Object.values(Category);
+        if (!category || !validCategories.includes(category)) {
+            return res.status(400).json({
+                error: `Invalid category. Must be one of: ${validCategories.join(', ')}`,
+            });
+        }
         if (!userId) {
             return res.status(401).json({
                 success: false,

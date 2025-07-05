@@ -1,11 +1,11 @@
 
 import { createContext, useContext, useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
   const [showUserLogin, setShowUserLogin] = useState(false)
@@ -24,7 +24,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, setShowUserLogin, showUserLogin }}>
+    <AuthContext.Provider value={{ user, userType, login, logout, setShowUserLogin, setUser, showUserLogin, setUserType, navigate }}>
       {children}
     </AuthContext.Provider>
   );

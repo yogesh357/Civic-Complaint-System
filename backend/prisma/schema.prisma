@@ -50,14 +50,13 @@ enum Status {
   IN_PROGRESS
   RESOLVED
   REJECTED
-}
-
+} 
 enum Category {
-  ROADS
+  POTHOLE
   WATER
-  ELECTRICITY
-  WASTE
-  PUBLIC_SAFETY
+  STREETLIGHT
+  WASTE 
+  SEWAGE
   OTHER
 }
 

@@ -16,9 +16,13 @@ const ComplaintForm = ({ onSubmit }) => {
   const { location, error: locationError, isLoading } = useGeolocation();
 
   const categories = [
-    'pothole', 'streetlight', 'garbage', 'water', 'sewage', 'road', 'other'
+    { label: "Pothole", value: "POTHOLE" },
+    { label: "Water", value: "WATER" },
+    { label: "Streetlight", value: "STREETLIGHT" },
+    { label: "Garbage", value: "WASTE" },
+    { label: "Other", value: "OTHER" },
+    { label: "Sewage", value: "SEWAGE" },
   ];
-
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -71,7 +75,7 @@ const ComplaintForm = ({ onSubmit }) => {
             required
           >
             {categories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+              <option key={cat.value} value={cat.value}>{cat.label}</option>
             ))}
           </select>
         </div>

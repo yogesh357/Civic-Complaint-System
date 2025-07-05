@@ -22,23 +22,23 @@ const SubmitComplaint = () => {
   return (
     <div className=" ">
       <h1>Report a Civic Issue</h1>
-      
+
       {submissionStatus === 'submitting' && (
         <div className="status-message">Submitting your complaint...</div>
       )}
-      
+
       {submissionStatus === 'success' && (
         <div className="status-message success">
           Complaint submitted successfully! Redirecting...
         </div>
       )}
-      
+
       {submissionStatus === 'error' && (
         <div className="status-message error">
           Failed to submit complaint. Please try again.
         </div>
       )}
-      
+
       {!submissionStatus || submissionStatus === 'error' ? (
         <ComplaintForm onSubmit={handleSubmit} />
       ) : null}

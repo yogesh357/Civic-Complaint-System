@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ComplaintMap from './ComplaintMap';
 import ComplaintList from './ComplaintList';
 import ClusterAnalysis from './ClusterAnalysis';
-import { updateComplaintStatus } from '../services/api';
+import { updateComplaintStatus } from '../services/complaintApi';
 
 const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {  // Added default value
   const [complaints, setComplaints] = useState(initialComplaints || []);    // Double safety

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import StatusTracker from '../components/StatusTracker';
-import { fetchComplaintById, updateComplaintStatus } from '../services/api';
+import { fetchComplaintById, updateComplaintStatus } from '../services/complaintApi';
 
 const TrackComplaint = () => {
   const [searchParams] = useSearchParams();

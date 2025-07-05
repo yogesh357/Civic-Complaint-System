@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
   const { complaints, loading, error } = useComplaintContext();
-  const { user,setShowUserLogin } = useAuthContext();
+  const { user, setShowUserLogin, userType } = useAuthContext();
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const navigate = useNavigate();
 
@@ -28,7 +28,8 @@ const HomePage = () => {
           <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
             <button
               className="bg-blue-600 text-white py-2 px-6 rounded-xl hover:bg-blue-700 transition duration-300"
-              onClick={() =>{ navigate('/citizen-login');
+              onClick={() => {
+                navigate('/citizen-login');
                 setShowUserLogin(true)
               }}
             >
@@ -43,9 +44,12 @@ const HomePage = () => {
           </div>
         ) : (
           <div className="mt-6 text-lg">
-            {user.type === 'citizen' ? (
+            {user.role === 'USER' ? (
               <>
-                <p className="mb-4">Welcome back, <span className="font-semibold text-blue-700">{user.name}</span>! Ready to report a new issue?</p>
+                <p className="mb-4 ">Welcome back,
+                  <span className="font-semibold text-blue-700">{user.name}</span>
+                  Ready to report a new issue?
+                </p>
                 <button
                   className="bg-blue-600 text-white py-2 px-6 rounded-xl hover:bg-blue-700 transition duration-300"
                   onClick={() => navigate('/submit-complaint')}
@@ -67,7 +71,7 @@ const HomePage = () => {
           </div>
         )}
       </header>
-        {/* Map Section */}
+      {/* Map Section */}
       {/* <section>
 //         <h2 className="text-2xl font-semibold mb-4">Issues in Your Area</h2>
 //         <div className="h-96 border rounded-xl overflow-hidden shadow-md">
@@ -83,7 +87,7 @@ const HomePage = () => {
 //           />
 //         </div>
 //       </section> */}
-    
+
 
       {/* Recent Complaints */}
       <section>

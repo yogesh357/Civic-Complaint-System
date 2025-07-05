@@ -1,4 +1,4 @@
- 
+
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
@@ -52,7 +52,7 @@ export const register = async (req, res) => {
 
         return res.json({
             success: true,
-            user: { email: user.email, name: user.name }
+            user: { email: user.email, name: user.name, role: user.role }
         });
 
     } catch (error) {

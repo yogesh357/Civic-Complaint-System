@@ -6,7 +6,7 @@ import { useAuthContext } from '../context/AuthContext';
 const LoginOptionsModal = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
 
-    const { setShowUserLOgin } = useAuthContext()
+    const { setShowUserLogin } = useAuthContext()
 
     const handleOptionClick = (path) => {
         onClose(); // Close the modal first

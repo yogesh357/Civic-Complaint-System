@@ -1,3 +1,6 @@
+import axiosInstance from "./axiosInstance";
+
+
 // Mock data
 const mockComplaints = [
   {
@@ -17,11 +20,55 @@ const mockComplaints = [
 ];
 // src/services/api.js
 
+export const submitComplaint = async (complaintData) => {
+  try {
+    // First validate required fields on client side
+    const requiredFields = ['title', 'description', 'location', 'category', 'userId'];
+    const missingFields = requiredFields.filter(field => !complaintData[field]);
+
+    if (missingFields.length > 0) {
+      throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+    }
+
+    // Log the outgoing request for debugging
+    console.log('Submitting complaint:', complaintData);
+
+    const response = await axiosInstance.post('api/complaints/', complaintData, {
+      headers: {
+        'Content-Type': 'application/json',
+        // Include authorization if needed
+        ...(localStorage.getItem('token') && {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        })
+      }
+    });
+
+    return response.data;
+
+  } catch (error) {
+    console.error('Complaint submission error:', error);
+
+    // Handle 400 Bad Request specifically
+    if (error.response && error.response.status === 400) {
+      // Extract backend validation messages if available
+      const serverMessage = error.response.data?.error ||
+        error.response.data?.message ||
+        'Invalid complaint data';
+      throw new Error(`Validation failed: ${serverMessage}`);
+    }
+
+    // Handle other errors
+    throw new Error(error.response?.data?.message ||
+      error.message ||
+      'Failed to submit complaint');
+  }
+};
+
 // Mock function - replace with actual API call
 export const updateComplaintStatus = async (complaintId, newStatus) => {
   // In a real app, this would be an API call like:
   // return axios.put(`/api/complaints/${complaintId}`, { status: newStatus });
-  
+
   // Mock implementation:
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -36,7 +83,7 @@ export const updateComplaintStatus = async (complaintId, newStatus) => {
   });
 };
 
- 
+
 // Mock API functions
 export const fetchComplaints = async () => {
   // Simulate network delay
@@ -51,16 +98,7 @@ export const fetchComplaintById = async (id) => {
   return complaint;
 };
 
-export const submitComplaint = async (complaint) => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  const newComplaint = {
-    ...complaint,
-    id: Math.random().toString(36).substr(2, 9),
-    status: 'submitted'
-  };
-  mockComplaints.unshift(newComplaint);
-  return newComplaint;
-};
+
 
 export const loginUser = async (credentials) => {
   await new Promise(resolve => setTimeout(resolve, 800));
@@ -73,3 +111,4 @@ export const loginUser = async (credentials) => {
     }
   };
 };
+

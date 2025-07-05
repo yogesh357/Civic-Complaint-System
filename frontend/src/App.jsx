@@ -20,30 +20,29 @@ import LoginOptionsModal from './components/LoginOptionsModal';
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <ComplaintProvider>
+    <AuthProvider>
+      <ComplaintProvider>
 
-          <div className="App">
-            {/* <Navbar isAuthenticated={true} /> */}
-            <Navbar />
-            <div className="main-content">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/submit-complaint" element={<SubmitComplaint />} />
-                <Route path="/track-complaint" element={<TrackComplaint />} />
-                <Route path="/department" element={<DepartmentView />} />
-                {/* <Route path="/login" element={<Auth mode="login" />} /> */}
-                <Route path="/citizen-login" element={<UserLogin />} />
-                <Route path="/officer-login" element={<OfficerLogin />} />
-                <Route path="/register" element={<Auth mode="register" />} />
-                <Route path="/login-options" element={<LoginOptionsModal />} />
+        <div className="App">
+          {/* <Navbar isAuthenticated={true} /> */}
+          <Navbar />
+          <div className="main-content">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/submit-complaint" element={<SubmitComplaint />} />
+              <Route path="/track-complaint" element={<TrackComplaint />} />
+              <Route path="/department" element={<DepartmentView />} />
+              {/* <Route path="/login" element={<Auth mode="login" />} /> */}
+              <Route path="/citizen-login" element={<UserLogin />} />
+              <Route path="/officer-login" element={<OfficerLogin />} />
+              <Route path="/register" element={<Auth mode="register" />} />
+              <Route path="/login-options" element={<LoginOptionsModal />} />
 
-                <Route path="/test" element={<Test />} />
-              </Routes>
-            </div>
+              <Route path="/test" element={<Test />} />
+            </Routes>
           </div>
-          {/* <ToastContainer
+        </div>
+        {/* <ToastContainer
             position="top-right"
             autoClose={5000}
             hideProgressBar={false}
@@ -55,10 +54,9 @@ function App() {
             pauseOnHover
             theme="colored"
           /> */}
-          <ToastContainer />
-        </ComplaintProvider>
-      </AuthProvider>
-    </Router>
+        <ToastContainer />
+      </ComplaintProvider>
+    </AuthProvider>
   );
 }
 

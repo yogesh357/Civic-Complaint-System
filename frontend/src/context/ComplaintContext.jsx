@@ -1,6 +1,6 @@
  
 import { createContext, useContext, useState, useEffect } from 'react';
-import { fetchComplaints, submitComplaint } from '../services/api';
+import { fetchComplaints, submitComplaint } from '../services/complaintApi';
 
 // 1. Create context
 const ComplaintContext = createContext();
