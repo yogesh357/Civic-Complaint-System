@@ -28,7 +28,7 @@ const authUser = async (req, res, next) => {
         // Attach user to request
         req.user = { 
             id: tokenDecode.id, 
-            userId:tokenDecode.id // adde dwhen error occured
+            // userId:tokenDecode.id // add dwhen error occured
         };
         
         next();

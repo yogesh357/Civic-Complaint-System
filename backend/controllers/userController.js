@@ -1,7 +1,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs'; 
 
 const prisma = new PrismaClient();
 
@@ -82,6 +82,7 @@ export const login = async (req, res) => {
             where: { email }
         });
 
+        console.log("logged in user : ", user)
         if (!user) {
             return res.status(401).json({
                 success: false,

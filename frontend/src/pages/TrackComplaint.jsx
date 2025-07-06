@@ -28,7 +28,7 @@ const TrackComplaint = () => {
         setLoading(false);
       }
     };
-    
+
     loadComplaint();
   }, [complaintId]);
 
@@ -70,7 +70,7 @@ const TrackComplaint = () => {
         <p className="font-bold">Error</p>
         <p>{error}</p>
       </div>
-      <button 
+      <button
         onClick={() => navigate(-1)}
         className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded"
       >
@@ -82,7 +82,7 @@ const TrackComplaint = () => {
   if (!complaint) return (
     <div className="max-w-4xl mx-auto p-6 text-center">
       <h2 className="text-2xl font-bold mb-4">No complaint found</h2>
-      <button 
+      <button
         onClick={() => navigate('/submit-complaint')}
         className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg"
       >
@@ -94,16 +94,15 @@ const TrackComplaint = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Track Your Complaint</h1>
-      
+
       {/* Complaint Details Card */}
       <div className="bg-gray-50 p-6 rounded-lg shadow-sm mb-8">
         <div className="flex flex-col md:flex-row md:items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800 capitalize mr-4">
             {complaint.category}
           </h2>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            statusOptions.find(s => s.value === complaint.status)?.color || 'bg-gray-300'
-          }`}>
+          <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusOptions.find(s => s.value === complaint.status)?.color || 'bg-gray-300'
+            }`}>
             {statusOptions.find(s => s.value === complaint.status)?.label || complaint.status}
           </span>
         </div>
@@ -117,11 +116,11 @@ const TrackComplaint = () => {
             <p className="text-gray-600 font-medium">Location:</p>
             <p className="text-gray-800">
               {complaint.location.address || 'Not specified'}
-              {complaint.location.latitude && (
+              {/* {complaint.location.latitude && (
                 <span className="block text-sm text-gray-500">
                   ({complaint.location.latitude.toFixed(6)}, {complaint.location.longitude.toFixed(6)})
                 </span>
-              )}
+              )} */}
             </p>
           </div>
           <div>
@@ -139,9 +138,9 @@ const TrackComplaint = () => {
         {complaint.image && (
           <div className="mt-4">
             <p className="text-gray-600 font-medium mb-2">Evidence:</p>
-            <img 
-              src={complaint.image} 
-              alt="Complaint evidence" 
+            <img
+              src={complaint.image}
+              alt="Complaint evidence"
               className="max-w-full h-auto max-h-64 rounded-lg border border-gray-200"
             />
           </div>
@@ -204,9 +203,8 @@ const TrackComplaint = () => {
               <button
                 type="submit"
                 disabled={statusUpdateLoading}
-                className={`px-4 py-2 rounded text-white ${
-                  statusUpdateLoading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
-                }`}
+                className={`px-4 py-2 rounded text-white ${statusUpdateLoading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
               >
                 {statusUpdateLoading ? 'Updating...' : 'Update Status'}
               </button>

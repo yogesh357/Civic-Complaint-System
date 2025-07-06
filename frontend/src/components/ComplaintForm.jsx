@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGeolocation } from '../services/geolocation';
 
 const ComplaintForm = ({ onSubmit }) => {
+  const [title, setTitle] = useState("")
   const [category, setCategory] = useState('pothole');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState(null);
@@ -48,6 +49,7 @@ const ComplaintForm = ({ onSubmit }) => {
     }
 
     const complaint = {
+      title,
       category,
       description,
       location: {
@@ -67,6 +69,12 @@ const ComplaintForm = ({ onSubmit }) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Category */}
         <div>
+          <label className="block text-gray-700 font-medium mb-2">Title*</label>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            type="text" className='w-full p-5 mb-1   bg-gray-50 rounded-lg border border-gray-200 focus:ring-2  ' name="" />
+
           <label className="block text-gray-700 font-medium mb-2">Issue Type*</label>
           <select
             className="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -126,7 +134,7 @@ const ComplaintForm = ({ onSubmit }) => {
 
         {/* Location Section */}
         <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
-          <h3 className="text-lg font-medium text-gray-800 mb-4">Location Details*</h3>
+          {/* <h3 className="text-lg font-medium text-gray-800 mb-4">Location Details*</h3>
 
           {isLoading ? (
             <div className="flex items-center text-blue-600">
@@ -144,7 +152,7 @@ const ComplaintForm = ({ onSubmit }) => {
             <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-md">
               ✅ Location detected: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
             </div>
-          )}
+          )} */}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

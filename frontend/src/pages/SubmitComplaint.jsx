@@ -8,13 +8,33 @@ const SubmitComplaint = () => {
   const navigate = useNavigate();
   const [submissionStatus, setSubmissionStatus] = React.useState(null);
 
+  // const handleSubmit = async (complaint) => {
+  //   try {
+  //     setSubmissionStatus('submitting');
+  //     const newComplaint = await addComplaint(complaint);
+  //     setSubmissionStatus('success');
+  //     setTimeout(() => navigate(`/track-complaint?id=${newComplaint.id}`), 2000);
+  //     console.log("submited complaint is :", newComplaint)
+  //   } catch (error) {
+  //     setSubmissionStatus('error');
+  //   }
+  // };
   const handleSubmit = async (complaint) => {
     try {
       setSubmissionStatus('submitting');
-      const newComplaint = await addComplaint(complaint);
+      const response = await addComplaint(complaint);
+
+      // Ensure we have the ID before navigating
+      if (!response?.id) {
+        throw new Error('No ID received in response');
+      }
+
+      console.log("Submitted complaint:", response);
       setSubmissionStatus('success');
-      setTimeout(() => navigate(`/track-complaint?id=${newComplaint.id}`), 2000);
+      navigate(`/track-complaint?id=${response.id}`);
+
     } catch (error) {
+      console.error("Submission error:", error);
       setSubmissionStatus('error');
     }
   };

@@ -1,13 +1,14 @@
 import prisma from '../config/prisma.js';
 import cloudinary from '../config/cloudinary.js';
 import { NotFoundError, ForbiddenError } from '../errors/index.js';
-import { Category } from '@prisma/client'; 
+import { Category } from '@prisma/client';
 
 // Create a new complaint
 export const addComplaint = async (req, res, next) => {
     try {
-        const { title, description, location, category } = req.body;
+        const { title, description, address, category } = req.body;
         const userId = req.user?.id || req.user?.userId;
+
         const validCategories = Object.values(Category);
         if (!category || !validCategories.includes(category)) {
             return res.status(400).json({
@@ -20,7 +21,7 @@ export const addComplaint = async (req, res, next) => {
                 message: "User authentication invalid"
             });
         }
-
+        const locationString = `${address.street}, ${address.area}, ${address.city}, ${address.pincode}`;
         let imageUrl = null;
         if (req.file) {
             const result = await cloudinary.uploader.upload(req.file.path, {
@@ -33,7 +34,7 @@ export const addComplaint = async (req, res, next) => {
             data: {
                 title,
                 description,
-                location,
+                location: locationString,
                 imageUrl,
                 status: 'PENDING',
                 category,
@@ -109,6 +110,7 @@ export const getUserComplaints = async (req, res, next) => {
     }
 };
 
+
 // Get single complaint details
 
 export const getComplaintDetails = async (req, res, next) => {
@@ -126,8 +128,10 @@ export const getComplaintDetails = async (req, res, next) => {
         }
 
         // 2. Get authenticated user ID
-        const { userId } = req.user;
+        const userId = req.user?.id || req.user?.userId;
 
+        console.log("user id when complaint details : ", userId)
+        console.log("complaint id :", complaintId)
         // 3. Fetch the complaint - FIXED: Using complaintId instead of id
         const complaint = await prisma.complaint.findUnique({
             where: {
