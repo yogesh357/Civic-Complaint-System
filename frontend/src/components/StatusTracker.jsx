@@ -1,11 +1,11 @@
 import React from 'react';
 
 const statusSteps = [
-  { id: 'submitted', label: 'Submitted', description: 'Your complaint has been received' },
-  { id: 'reviewed', label: 'Under Review', description: 'Department is assessing the issue' },
-  { id: 'assigned', label: 'Assigned', description: 'Team has been assigned to resolve' },
-  { id: 'in-progress', label: 'In Progress', description: 'Work is underway' },
-  { id: 'resolved', label: 'Resolved', description: 'Issue has been fixed' }
+  { id: 'PENDING', label: 'Pending', description: 'Your complaint has been received' },
+  { id: 'UNDER_REVIEW', label: 'Under Review', description: 'Department is assessing the issue' },
+  { id: 'IN_PROGRESS', label: 'In Progress', description: 'Work is underway' },
+  { id: 'RESOLVED', label: 'Resolved', description: 'Issue has been fixed' },
+  { id: 'REJECTED', label: 'Rejected', description: 'Complaint was not approved' }
 ];
 
 const StatusTracker = ({ status }) => {
@@ -16,8 +16,8 @@ const StatusTracker = ({ status }) => {
       <h2>Current Status: {statusSteps[currentIndex]?.label || 'Unknown'}</h2>
       <div className="timeline">
         {statusSteps.map((step, index) => (
-          <div 
-            key={step.id} 
+          <div
+            key={step.id}
             className={`timeline-step ${index <= currentIndex ? 'completed' : ''}`}
           >
             <div className="step-marker"></div>

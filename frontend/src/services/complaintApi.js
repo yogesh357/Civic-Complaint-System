@@ -2,12 +2,12 @@ import axiosInstance from "./axiosInstance";
 
 export const submitComplaint = async (complaintData) => {
   try {
-    const requiredFields = ['title', 'description', 'location', 'category'];
-    const missingFields = requiredFields.filter(field => !complaintData[field]);
+    // const requiredFields = ['title', 'description', 'location', 'category'];
+    // const missingFields = requiredFields.filter(field => !complaintData[field]);
 
-    if (missingFields.length > 0) {
-      throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-    }
+    // if (missingFields.length > 0) {
+    //   throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+    // }
 
     console.log('Submitting complaint:', complaintData);
 

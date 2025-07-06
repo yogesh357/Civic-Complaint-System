@@ -9,8 +9,9 @@ import cors from 'cors'
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:5173',  
-  credentials: true,               
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],git
+  credentials: true,
 }));
 
 

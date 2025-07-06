@@ -19,10 +19,20 @@ const TrackComplaint = () => {
     const loadComplaint = async () => {
       try {
         if (!complaintId) throw new Error('No complaint ID provided');
-        const data = await fetchComplaintById(complaintId);
-        setComplaint(data);
-        setNewStatus(data.status);
+        const response = await fetchComplaintById(complaintId);
+
+        // Extract the actual complaint data from the response
+        const complaintData = response.data?.data;
+
+        if (!complaintData) {
+          throw new Error('No complaint data received');
+        }
+
+        console.log("Complaint data:", complaintData);
+        setComplaint(complaintData);
+        setNewStatus(complaintData.status);
       } catch (err) {
+        console.error("Error loading complaint:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -38,7 +48,7 @@ const TrackComplaint = () => {
     try {
       const updatedComplaint = await updateComplaintStatus(complaintId, {
         status: newStatus,
-        adminComment
+        // adminComment
       });
       setComplaint(updatedComplaint);
       setShowUpdateForm(false);
@@ -115,18 +125,21 @@ const TrackComplaint = () => {
           <div>
             <p className="text-gray-600 font-medium">Location:</p>
             <p className="text-gray-800">
-              {complaint.location.address || 'Not specified'}
-              {/* {complaint.location.latitude && (
-                <span className="block text-sm text-gray-500">
-                  ({complaint.location.latitude.toFixed(6)}, {complaint.location.longitude.toFixed(6)})
-                </span>
-              )} */}
+              {complaint.location ? (
+                complaint.location.split(',').map((part, index) => (
+                  <span key={index} className="block">
+                    {part.trim()}
+                  </span>
+                ))
+              ) : (
+                'Not specified'
+              )}
             </p>
           </div>
           <div>
             <p className="text-gray-600 font-medium">Date Reported:</p>
             <p className="text-gray-800">
-              {new Date(complaint.timestamp).toLocaleString()}
+              {new Date(complaint.updatedAt).toLocaleString()}
             </p>
           </div>
           <div>

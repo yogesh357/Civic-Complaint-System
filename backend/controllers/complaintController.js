@@ -21,7 +21,36 @@ export const addComplaint = async (req, res, next) => {
                 message: "User authentication invalid"
             });
         }
-        const locationString = `${address.street}, ${address.area}, ${address.city}, ${address.pincode}`;
+        // const locationString = `${address.street}, ${address.area}, ${address.city}, ${address.pincode}`;
+        // 1. Add address validation
+        if (!address || typeof address !== 'object') {
+            return res.status(400).json({
+                success: false,
+                message: "Address data is required"
+            });
+        }
+
+        // 2. Validate address components
+        const requiredAddressFields = ['street', 'city', 'pincode'];
+        const missingFields = requiredAddressFields.filter(field => !address[field]);
+
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Missing address fields: ${missingFields.join(', ')}`
+            });
+        }
+
+        // 3. Safely construct location string
+        const locationString = [
+            address.street || '',
+            address.area || '',
+            address.city || '',
+            address.pincode || ''
+        ].filter(Boolean).join(', ');  
+
+
+
         let imageUrl = null;
         if (req.file) {
             const result = await cloudinary.uploader.upload(req.file.path, {
@@ -57,6 +86,7 @@ export const addComplaint = async (req, res, next) => {
             }
         });
 
+        console.log("submited complent", complaint)
         return res.status(201).json({
             success: true,
             data: complaint

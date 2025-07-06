@@ -29,7 +29,7 @@ const router = express.Router();
 router.post('/', authUser, upload.single('image'), validateComplaint, addComplaint);
 router.get('/', authUser, getUserComplaints);
 router.get('/:id', authUser, getComplaintDetails);
-router.put('/:id', authUser, validateComplaint, updateComplaint);
+router.patch('/:id', authUser, validateComplaint, updateComplaint);
 router.delete('/:id', authUser, deleteComplaint);
 
 export default router;

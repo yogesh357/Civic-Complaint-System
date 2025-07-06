@@ -52,9 +52,12 @@ const ComplaintForm = ({ onSubmit }) => {
       title,
       category,
       description,
-      location: {
-        ...location,
-        address: `${address.street}, ${address.area}, ${address.landmark}, ${address.city}, ${address.pincode}`
+      address: {  // Change from 'location' to 'address' to match backend
+        street: address.street,
+        area: address.area,
+        city: address.city,
+        pincode: address.pincode,
+        landmark: address.landmark
       },
       image,
       timestamp: new Date().toISOString()
