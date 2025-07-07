@@ -8,11 +8,7 @@ import cors from 'cors'
 
 const app = express();
 
-app.use(cors({
-  origin: 'http://localhost:5173',
-  methods: ['GET', 'POST', 'PATCH', 'DELETE'],git
-  credentials: true,
-}));
+
 
 
 // Middlewares
@@ -42,7 +38,12 @@ app.use(express.urlencoded({
 
 app.use(cookieParser());
 
-
+app.use(cors({
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  credentials: true,
+  exposedHeaders: ['set-cookie']
+}));
 
 // Routes
 app.get('/', (req, res) => {

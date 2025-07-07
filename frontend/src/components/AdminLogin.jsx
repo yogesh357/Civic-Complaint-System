@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import toast from 'react-hot-toast';
 import { useAuthContext } from '../context/AuthContext';
+import { adminLogin, adminRegister } from '../services/adminApi';
 
-function OfficerLogin() {
-    const { setShowUserLogin, setUser, axios, navigate,setUserType } = useAuthContext()
+function AdminLogin() {
+    const { setShowUserLogin, setUser, axios, navigate, setUserType } = useAuthContext()
 
     const [state, setState] = useState("login");
     const [name, setName] = useState("");
@@ -13,12 +14,20 @@ function OfficerLogin() {
     const onSubmitHandler = async (event) => {
         try {
             event.preventDefault();
+            let data;
+            if (state == "register") {
+                data = await adminRegister(name, email, password)
+            } else {
+                data = await adminLogin(email, password)
+            }
 
-            const { data } = await axios.post(`/api/user/${state}`, { name, email, password })
+
             if (data.success) {
                 navigate('/')
+                console.log("admin data : ", data)
+                toast.success("Admin logged in succesfully")
                 setUser(data.user)
-                setUserType('officer')
+                setUserType('ADMIN')
                 setShowUserLogin(false)
 
             } else {
@@ -70,4 +79,4 @@ function OfficerLogin() {
 }
 
 
-export default OfficerLogin
+export default AdminLogin

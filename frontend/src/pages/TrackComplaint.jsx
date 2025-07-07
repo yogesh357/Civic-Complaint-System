@@ -102,7 +102,7 @@ const TrackComplaint = () => {
   );
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-5">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Track Your Complaint</h1>
 
       {/* Complaint Details Card */}
