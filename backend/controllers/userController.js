@@ -1,7 +1,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs'; 
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -81,8 +81,7 @@ export const login = async (req, res) => {
         const user = await prisma.user.findUnique({
             where: { email }
         });
-
-        console.log("logged in user : ", user)
+ 
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -113,7 +112,7 @@ export const login = async (req, res) => {
 
         return res.json({
             success: true,
-            user: { email: user.email, name: user.name }
+            user: { email: user.email, name: user.name , role:user.role}
         });
 
     } catch (error) {
@@ -130,7 +129,7 @@ export const isAuth = async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where: { id: req.user.id },
-            select: { id: true, email: true, name: true } // Fixed select syntax
+            select: { id: true, email: true, name: true, complaints: true,role:true }
         });
 
         if (!user) {

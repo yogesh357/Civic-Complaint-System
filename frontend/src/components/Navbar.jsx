@@ -130,8 +130,8 @@ const Navbar = () => {
         <Link to="/submit-complaint" className="hover:text-indigo-600 transition-colors">
           Report Issue
         </Link>
-        <Link to="/track-complaint" className="hover:text-indigo-600 transition-colors">
-          Track Complaint
+        <Link to="/my-complaint" className="hover:text-indigo-600 transition-colors">
+          Previous Complaints
         </Link>
 
         {userType === 'ADMIN' && (
@@ -181,7 +181,7 @@ const Navbar = () => {
                     logout();
                     setIsProfileOpen(false);
                   }}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                  className="w-full text-left px-4 py-2 text-sm cursor-pointer text-gray-700 hover:bg-gray-100 flex items-center"
                 >
                   <FiLogOut className="mr-2" />
                   Logout

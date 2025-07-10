@@ -1,38 +1,15 @@
-// import React from 'react'
 
-// import { toast } from 'react-toastify';
-
-// const Test = () => {
-
-//     const demo = () => {
-//         console.log("Button clicked")
-//         toast.success("Button clicked")
-//     }
-//     const load = () => {
-//         toast.promise(promise, {
-//             pending: 'Loading...',
-//             success: 'Data fetched successfully!',
-//             error: 'Error fetching data'
-//         });
-//     }
-
-//     return (
-//         <div>
-//             <button onClick={demo}>Click me</button>
-//             <button onClick={load}>loading test</button>
-
-//         </div>
-//     )
-// }
-
-// export default Test
 import React from 'react';
 import { toast } from 'react-toastify';
 
 const Test = () => {
     const demo = () => {
         console.log("Button clicked");
-        toast.success("Button clicked");
+        // toast.success("Button clicked");
+        toast.success("Button clicked", {
+            autoClose: 3000
+        });
+
     };
 
     // Example promise function

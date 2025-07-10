@@ -2,15 +2,8 @@ import axiosInstance from "./axiosInstance";
 
 export const submitComplaint = async (complaintData) => {
   try {
-    // const requiredFields = ['title', 'description', 'location', 'category'];
-    // const missingFields = requiredFields.filter(field => !complaintData[field]);
-
-    // if (missingFields.length > 0) {
-    //   throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-    // }
-
-    console.log('Submitting complaint:', complaintData);
-
+    
+ 
     const response = await axiosInstance.post('api/complaints/', complaintData);
 
     return response.data;
@@ -42,8 +35,10 @@ export const updateComplaintStatus = async (complaintId, status) => {
 }
 
 export const getUserComplaint = async () => {
-  return await axiosInstance.get('/api/complaints/')
+  const respone = await axiosInstance.get('/api/complaints/')  
+  return respone.data.data;
 }
+
 
 // delete complaint 
 export const deleteComplaint = async () => {
@@ -52,15 +47,4 @@ export const deleteComplaint = async () => {
 
 
 
-export const loginUser = async (credentials) => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  return {
-    token: 'mock-token',
-    user: {
-      email: credentials.email,
-      name: credentials.name || 'User',
-      type: credentials.email.endsWith('@city.gov') ? 'department' : 'citizen'
-    }
-  };
-};
-
+ 

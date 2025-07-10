@@ -47,7 +47,7 @@ export const addComplaint = async (req, res, next) => {
             address.area || '',
             address.city || '',
             address.pincode || ''
-        ].filter(Boolean).join(', ');  
+        ].filter(Boolean).join(', ');
 
 
 
@@ -111,10 +111,9 @@ export const addComplaint = async (req, res, next) => {
 // Get all complaints for the authenticated user
 export const getUserComplaints = async (req, res, next) => {
     try {
-        const { userId } = req.user;
-
+        const { id } = req.user;
         const complaints = await prisma.complaint.findMany({
-            where: { userId },
+            where: { userId: id },
             select: {
                 id: true,
                 title: true,
@@ -124,6 +123,7 @@ export const getUserComplaints = async (req, res, next) => {
                 imageUrl: true,
                 createdAt: true,
                 updatedAt: true,
+                userId: true
             },
             orderBy: {
                 createdAt: 'desc',
@@ -160,8 +160,6 @@ export const getComplaintDetails = async (req, res, next) => {
         // 2. Get authenticated user ID
         const userId = req.user?.id || req.user?.userId;
 
-        console.log("user id when complaint details : ", userId)
-        console.log("complaint id :", complaintId)
         // 3. Fetch the complaint - FIXED: Using complaintId instead of id
         const complaint = await prisma.complaint.findUnique({
             where: {

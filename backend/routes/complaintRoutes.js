@@ -1,17 +1,4 @@
-// import express from 'express'
-// import authUser from '../middlewares/authUser.js'
-// import { addComplaint, deleteComplaint, getComplaintById, getUserComplaints } from '../controllers/complaintController.js'
-// import { upload } from '../config/multer.js'
-
-// const complaintRouter = express.Router()
-
-// complaintRouter.post('/add-complaint', upload.single(), authUser, addComplaint)
-// complaintRouter.get('/my-complaints', authUser, getUserComplaints)
-// complaintRouter.get('/:complaintId', authUser, getComplaintById) //Get a single complaint by ID (details + status)
-// complaintRouter.delete('/:complaintId', deleteComplaint) ///delete complaint
-
-// export default complaintRouter
-
+ 
 import express from 'express';
 import authUser from '../middlewares/authUser.js';
 import {

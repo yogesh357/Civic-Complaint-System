@@ -8,8 +8,7 @@ export const adminLogin = async (email, password) => {
     })
 }
 
-export const adminRegister = async (name, email, password) => {
-    console.log("admin data in api :" ,name,email,password)
+export const adminRegister = async (name, email, password) => { 
     return await axiosInstance.post('/api/admin/register', {
         name, email, password
     },

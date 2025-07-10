@@ -1,38 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import StatusTracker from '../components/StatusTracker';
 import { fetchComplaintById, updateComplaintStatus } from '../services/complaintApi';
+
+const statusOptions = [
+  { value: 'submitted', label: 'Submitted', color: 'bg-gray-300' },
+  { value: 'under_review', label: 'Under Review', color: 'bg-blue-300' },
+  { value: 'in_progress', label: 'In Progress', color: 'bg-yellow-300' },
+  { value: 'resolved', label: 'Resolved', color: 'bg-green-300' },
+  { value: 'rejected', label: 'Rejected', color: 'bg-red-300' }
+];
+
+const getStatusMeta = (value) => {
+  return statusOptions.find((s) => s.value === value) || {
+    label: value,
+    color: 'bg-gray-300'
+  };
+};
 
 const TrackComplaint = () => {
   const [searchParams] = useSearchParams();
   const complaintId = searchParams.get('id');
+  const navigate = useNavigate();
+
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
-  const [showUpdateForm, setShowUpdateForm] = useState(false);
-  const [newStatus, setNewStatus] = useState('');
-  const [adminComment, setAdminComment] = useState('');
-  const navigate = useNavigate();
+
+  const [statusForm, setStatusForm] = useState({
+    show: false,
+    loading: false,
+    newStatus: '',
+    comment: ''
+  });
 
   useEffect(() => {
     const loadComplaint = async () => {
       try {
         if (!complaintId) throw new Error('No complaint ID provided');
         const response = await fetchComplaintById(complaintId);
-
-        // Extract the actual complaint data from the response
         const complaintData = response.data?.data;
 
-        if (!complaintData) {
-          throw new Error('No complaint data received');
-        }
+        if (!complaintData) throw new Error('No complaint data received');
 
-        console.log("Complaint data:", complaintData);
         setComplaint(complaintData);
-        setNewStatus(complaintData.status);
+        setStatusForm((prev) => ({ ...prev, newStatus: complaintData.status }));
       } catch (err) {
-        console.error("Error loading complaint:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -44,76 +58,70 @@ const TrackComplaint = () => {
 
   const handleStatusUpdate = async (e) => {
     e.preventDefault();
-    setStatusUpdateLoading(true);
+    setStatusForm((prev) => ({ ...prev, loading: true }));
     try {
       const updatedComplaint = await updateComplaintStatus(complaintId, {
-        status: newStatus,
-        // adminComment
+        status: statusForm.newStatus,
+        adminComment: statusForm.comment
       });
+      toast.success('Status updated successfully!');
       setComplaint(updatedComplaint);
-      setShowUpdateForm(false);
-      setAdminComment('');
+      setStatusForm({ show: false, loading: false, newStatus: updatedComplaint.status, comment: '' });
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setStatusUpdateLoading(false);
+      toast.error(err.message || 'Failed to update complaint status');
+      setStatusForm((prev) => ({ ...prev, loading: false }));
     }
   };
 
-  const statusOptions = [
-    { value: 'submitted', label: 'Submitted', color: 'bg-gray-300' },
-    { value: 'under_review', label: 'Under Review', color: 'bg-blue-300' },
-    { value: 'in_progress', label: 'In Progress', color: 'bg-yellow-300' },
-    { value: 'resolved', label: 'Resolved', color: 'bg-green-300' },
-    { value: 'rejected', label: 'Rejected', color: 'bg-red-300' }
-  ];
+  // UI Rendering
 
-  if (loading) return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-  );
-
-  if (error) return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
-        <p className="font-bold">Error</p>
-        <p>{error}</p>
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
-      <button
-        onClick={() => navigate(-1)}
-        className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded"
-      >
-        Go Back
-      </button>
-    </div>
-  );
+    );
+  }
 
-  if (!complaint) return (
-    <div className="max-w-4xl mx-auto p-6 text-center">
-      <h2 className="text-2xl font-bold mb-4">No complaint found</h2>
-      <button
-        onClick={() => navigate('/submit-complaint')}
-        className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg"
-      >
-        Submit New Complaint
-      </button>
-    </div>
-  );
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+          <p className="font-bold">Error</p>
+          <p>{error}</p>
+        </div>
+        <button onClick={() => navigate(-1)} className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded">
+          Go Back
+        </button>
+      </div>
+    );
+  }
+
+  if (!complaint) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 text-center">
+        <h2 className="text-2xl font-bold mb-4">No complaint found</h2>
+        <button
+          onClick={() => navigate('/submit-complaint')}
+          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg"
+        >
+          Submit New Complaint
+        </button>
+      </div>
+    );
+  }
+
+  const statusMeta = getStatusMeta(complaint.status);
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-5">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Track Your Complaint</h1>
 
-      {/* Complaint Details Card */}
       <div className="bg-gray-50 p-6 rounded-lg shadow-sm mb-8">
         <div className="flex flex-col md:flex-row md:items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800 capitalize mr-4">
-            {complaint.category}
-          </h2>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusOptions.find(s => s.value === complaint.status)?.color || 'bg-gray-300'
-            }`}>
-            {statusOptions.find(s => s.value === complaint.status)?.label || complaint.status}
+          <h2 className="text-xl font-semibold text-gray-800 capitalize mr-4">{complaint.category}</h2>
+          <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusMeta.color}`}>
+            {statusMeta.label}
           </span>
         </div>
 
@@ -125,22 +133,18 @@ const TrackComplaint = () => {
           <div>
             <p className="text-gray-600 font-medium">Location:</p>
             <p className="text-gray-800">
-              {complaint.location ? (
-                complaint.location.split(',').map((part, index) => (
-                  <span key={index} className="block">
+              {complaint.location
+                ? complaint.location.split(',').map((part, idx) => (
+                  <span key={idx} className="block">
                     {part.trim()}
                   </span>
                 ))
-              ) : (
-                'Not specified'
-              )}
+                : 'Not specified'}
             </p>
           </div>
           <div>
             <p className="text-gray-600 font-medium">Date Reported:</p>
-            <p className="text-gray-800">
-              {new Date(complaint.updatedAt).toLocaleString()}
-            </p>
+            <p className="text-gray-800">{new Date(complaint.updatedAt).toLocaleString()}</p>
           </div>
           <div>
             <p className="text-gray-600 font-medium">Complaint ID:</p>
@@ -148,7 +152,7 @@ const TrackComplaint = () => {
           </div>
         </div>
 
-        {complaint.image && (
+        {complaint.image ? (
           <div className="mt-4">
             <p className="text-gray-600 font-medium mb-2">Evidence:</p>
             <img
@@ -157,24 +161,21 @@ const TrackComplaint = () => {
               className="max-w-full h-auto max-h-64 rounded-lg border border-gray-200"
             />
           </div>
+        ) : (
+          <p className="text-sm italic text-gray-500">No image provided.</p>
         )}
       </div>
 
-      {/* Status Tracker */}
       <div className="mb-8">
         <h3 className="text-xl font-semibold text-gray-800 mb-4">Status Progress</h3>
         <StatusTracker status={complaint.status} />
       </div>
 
-      {/* Resolution Estimate */}
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-8">
         <h3 className="text-lg font-semibold text-blue-800 mb-2">Estimated Resolution Time</h3>
-        <p className="text-blue-700">
-          Based on similar issues, we expect to resolve this within 7-10 business days
-        </p>
+        <p className="text-blue-700">Based on similar issues, we expect to resolve this within 7-10 business days</p>
       </div>
 
-      {/* Admin Section (Conditional) */}
       {complaint.adminComment && (
         <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200 mb-8">
           <h3 className="text-lg font-semibold text-yellow-800 mb-2">Admin Note</h3>
@@ -182,48 +183,49 @@ const TrackComplaint = () => {
         </div>
       )}
 
-      {/* Status Update Form (For Admins) */}
-      {showUpdateForm && (
+      {statusForm.show && (
         <div className="bg-gray-100 p-4 rounded-lg mb-8">
           <h3 className="text-lg font-semibold mb-3">Update Status</h3>
           <form onSubmit={handleStatusUpdate}>
             <div className="mb-4">
               <label className="block text-gray-700 font-medium mb-2">New Status</label>
               <select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
+                value={statusForm.newStatus}
+                onChange={(e) => setStatusForm((prev) => ({ ...prev, newStatus: e.target.value }))}
                 className="w-full p-2 border border-gray-300 rounded"
                 required
               >
-                {statusOptions.map(option => (
+                {statusOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
               </select>
             </div>
+
             <div className="mb-4">
               <label className="block text-gray-700 font-medium mb-2">Comment (Optional)</label>
               <textarea
-                value={adminComment}
-                onChange={(e) => setAdminComment(e.target.value)}
+                value={statusForm.comment}
+                onChange={(e) => setStatusForm((prev) => ({ ...prev, comment: e.target.value }))}
                 className="w-full p-2 border border-gray-300 rounded"
                 rows="3"
                 placeholder="Add any additional notes..."
               />
             </div>
+
             <div className="flex space-x-3">
               <button
                 type="submit"
-                disabled={statusUpdateLoading}
-                className={`px-4 py-2 rounded text-white ${statusUpdateLoading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+                disabled={statusForm.loading}
+                className={`px-4 py-2 rounded text-white ${statusForm.loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
                   }`}
               >
-                {statusUpdateLoading ? 'Updating...' : 'Update Status'}
+                {statusForm.loading ? 'Updating...' : 'Update Status'}
               </button>
               <button
                 type="button"
-                onClick={() => setShowUpdateForm(false)}
+                onClick={() => setStatusForm((prev) => ({ ...prev, show: false }))}
                 className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded"
               >
                 Cancel
@@ -233,8 +235,7 @@ const TrackComplaint = () => {
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 mt-4">
         <button
           onClick={() => navigate(-1)}
           className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded"
@@ -242,10 +243,10 @@ const TrackComplaint = () => {
           Back to List
         </button>
         <button
-          onClick={() => setShowUpdateForm(!showUpdateForm)}
+          onClick={() => setStatusForm((prev) => ({ ...prev, show: !prev.show }))}
           className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
         >
-          {showUpdateForm ? 'Hide Update Form' : 'Update Status'}
+          {statusForm.show ? 'Hide Update Form' : 'Update Status'}
         </button>
       </div>
     </div>

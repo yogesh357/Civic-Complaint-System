@@ -194,8 +194,7 @@ export const register = async (req, res, next) => {
 };
 
 // Get current admin profile
-export const getProfile = async (req, res, next) => {
-    console.log('Request user ID:', req.user.userId);
+export const getProfile = async (req, res, next) => { 
     try {
         const admin = await prisma.user.findUnique({
             where: { id: req.user.userId },
@@ -208,8 +207,7 @@ export const getProfile = async (req, res, next) => {
                 createdAt: true
             }
         });
-
-        console.log('Fetched admin:', admin);
+ 
 
         if (!admin || admin.role !== 'ADMIN') {
             throw new ForbiddenError('Admin not found');

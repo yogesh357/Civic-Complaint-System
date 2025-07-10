@@ -30,3 +30,13 @@ export const loginUser = async (email, password) => {
     return data;
 };
 
+export const logoutUser = async () => {
+    const response = await axiosInstance.get('/api/user/logout')
+    
+    return response.data
+}
+
+export const fetchUser = async()=>{
+    const response = await axiosInstance.get('/api/user/is-auth') 
+    return response.data
+}

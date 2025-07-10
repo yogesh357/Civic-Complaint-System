@@ -1,10 +1,8 @@
-
-
-import React, { useState } from 'react';
-import toast from 'react-hot-toast';
+import React, { useState } from 'react'; 
 import { useAuthContext } from '../context/AuthContext';
 import { loginUser, registerUser } from '../services/userApi';
 import { adminLogin, adminRegister } from '../services/adminApi';
+import { toast } from 'react-toastify';
 
 function AuthModal() {
     const {
@@ -14,7 +12,9 @@ function AuthModal() {
         setUser,
         navigate,
         setUserType,
-        showAuthModal
+        showAuthModal,
+        user,
+        userType
     } = useAuthContext();
 
     const [formState, setFormState] = useState('login'); // 'login' or 'register'
@@ -23,44 +23,7 @@ function AuthModal() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // const handleAuthSubmit = async (e) => {
-    //     e.preventDefault();
-    //     setLoading(true);
 
-    //     try {
-    //         let response;
-    //         const formData = { email, password };
-
-    //         if (formState === 'register') {
-    //             formData.name = name;
-    //         }
-
-    //         if (authModalType === 'user') {
-    //             response = formState === 'login'
-    //                 ? await loginUser(email,password)
-    //                 : await registerUser(name,email,password);
-    //         } else {
-    //             response = formState === 'login'
-    //                 ? await adminLogin(formData)
-    //                 : await adminRegister(formData);
-    //         }
-
-    //         if (response.data?.success) {
-    //             setUser(response.data.user);
-    //             setUserType(authModalType.toUpperCase());
-    //             navigate(authModalType === 'user' ? '/' : '/department');
-    //             setShowAuthModal(false);
-    //             toast.success(
-    //                 `${authModalType} ${formState === 'login' ? 'logged in' : 'registered'} successfully`
-    //             );
-    //         }
-    //     } catch (error) {
-    //         console.error('Auth error:', error);
-    //         toast.error(error.response?.data?.message || 'Authentication failed');
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
     const handleAuthSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -79,18 +42,25 @@ function AuthModal() {
                     response = await adminLogin(email, password);
                 } else {
 
-                    console.log("admin data in authModal :", name, email, password)
                     response = await adminRegister(name, email, password);
                 }
             }
 
-            // Handle response based on your API structure
-            const responseData = response.data || response; // Works with both {data} and direct response
+            const responseData = response.data || response;
+            console.log("respone data from auth model", responseData)
 
             if (responseData.success) {
-                setUser(responseData.user);
-                setUserType(authModalType.toUpperCase());
-                navigate(authModalType === 'user' ? '/' : '/department');
+                console.log("logged in ..")
+                const userInfo = responseData.user || responseData.data; // works for both user and admin
+                setUser(userInfo);
+                console.log("userInfo :", userInfo)
+                // setUser(responseData.user);
+                console.log("user from auth modal ", user)
+                // const role = responseData.user.role?.toUpperCase(); // "USER" or "ADMIN"
+                const role = userInfo.role?.toUpperCase(); // "USER" or "ADMIN"
+                setUserType(role);
+
+                navigate(authModalType.toUpperCase() === 'USER' ? '/' : '/department');
                 setShowAuthModal(false);
                 toast.success(
                     `${authModalType} ${formState === 'login' ? 'logged in' : 'registered'} successfully`
@@ -104,7 +74,7 @@ function AuthModal() {
         } finally {
             setLoading(false);
         }
-    };
+    }; 
 
     if (!showAuthModal) return null;
 
