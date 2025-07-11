@@ -319,7 +319,7 @@ export const getComplaintById = async (req, res, next) => {
             } 
 
         });
-
+ 
         if (!complaint) {
             return res.status(404).json({ success: false, message: 'Complaint not found' });
         }

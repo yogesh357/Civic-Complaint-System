@@ -125,7 +125,7 @@ const TrackComplaint = () => {
   const statusMeta = getStatusMeta(complaint.status);
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-5">
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-xl mb-10 mt-5">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Track Your Complaint</h1>
 
       <div className="bg-gray-50 p-6 rounded-lg shadow-sm mb-8">
@@ -177,10 +177,20 @@ const TrackComplaint = () => {
         )}
       </div>
 
+      {/* user details */}
+      {userType === 'ADMIN' && complaint.user && (
+        <div className=" text-sm text-gray-600  bg-gray-50 p-6 rounded-lg shadow-sm  mb-8">
+          <p><span className="font-bold">Filed by :</span> {complaint.user.name}</p>
+          <p><span className="font-bold">Email :</span> {complaint.user.email}</p>
+        </div>
+      )}
+
       <div className="mb-8">
         <h3 className="text-xl font-semibold text-gray-800 mb-4">Status Progress</h3>
         <StatusTracker status={complaint.status} />
       </div>
+
+
 
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-8">
         <h3 className="text-lg font-semibold text-blue-800 mb-2">Estimated Resolution Time</h3>
@@ -255,12 +265,26 @@ const TrackComplaint = () => {
         >
           Back to List
         </button>
-        <button
+        {/* <button
           onClick={() => setStatusForm((prev) => ({ ...prev, show: !prev.show }))}
           className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
         >
-          {statusForm.show ? 'Hide Update Form' : 'Update Status'}
-        </button>
+          {statusForm.show
+            ? 'Hide Update Form'
+            : userType === 'ADMIN'
+              ? 'Update Status'
+              : null}
+
+        </button> */}
+        {userType === 'ADMIN' && (
+          <button
+            onClick={() => setStatusForm((prev) => ({ ...prev, show: !prev.show }))}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
+          >
+            {statusForm.show ? 'Hide Update Form' : 'Update Status'}
+          </button>
+        )}
+
       </div>
     </div>
   );
