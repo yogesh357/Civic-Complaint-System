@@ -12,7 +12,7 @@ const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {
   // Initialize state with props only once
   const [complaints, setComplaints] = useState(initialComplaints || []);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
-  const [view, setView] = useState('map');
+  const [view, setView] = useState('list');
   const [filter, setFilter] = useState('all');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -119,13 +119,13 @@ const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {
             </div>
 
             <div className="flex border rounded-md overflow-hidden">
-              <ViewToggleButton
+              {/* <ViewToggleButton
                 active={view === 'map'}
                 onClick={() => setView('map')}
                 icon="map"
                 label="Map"
                 disabled={isUpdating}
-              />
+              /> */}
               <ViewToggleButton
                 active={view === 'list'}
                 onClick={() => setView('list')}
@@ -149,13 +149,13 @@ const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {
       <main className="grid grid-cols-1   gap-6">
         <div className={`lg:col-span-${selectedComplaint ? '2' : '3'}`}>
           <ErrorBoundary FallbackComponent={ErrorFallback}>
-            {view === 'map' && (
+            {/* {view === 'map' && (
               <ComplaintMap
                 complaints={filteredComplaints}
                 center={selectedComplaint?.location}
                 onMarkerClick={setSelectedComplaint}
               />
-            )}
+            )} */}
 
             {view === 'list' && (
               <ComplaintList

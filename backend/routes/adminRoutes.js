@@ -7,7 +7,9 @@ import {
     login,
     getProfile,
     createFirstAdmin,
-    register
+    register,
+    logoutAdmin,
+    getComplaintById
 } from '../controllers/adminController.js';
 import { authenticateAdmin, checkRole, validateRequest } from '../middlewares/authMiddleware.js';
 import { adminRegistrationSchema } from '../schemas/adminSchema.js';
@@ -28,6 +30,8 @@ router.post(
     register
 );
 
+router.get('/logout', logoutAdmin)
+
 
 // Protected routes
 
@@ -35,6 +39,7 @@ router.get('/profile', getProfile); // for getting current admin profile
 
 // Complaint management routes
 router.get('/complaints', getAllComplaints);
+router.get('/complaint/:id', getComplaintById)
 router.patch('/complaints/:id/status', updateComplaintStatus);
 
 // User management routes

@@ -3,6 +3,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import StatusTracker from '../components/StatusTracker';
 import { fetchComplaintById, updateComplaintStatus } from '../services/complaintApi';
+import { useAuthContext } from '../context/AuthContext';
+import { trackComplaint } from '../services/adminApi';
 
 const statusOptions = [
   { value: 'submitted', label: 'Submitted', color: 'bg-gray-300' },
@@ -20,6 +22,9 @@ const getStatusMeta = (value) => {
 };
 
 const TrackComplaint = () => {
+
+  const { userType } = useAuthContext()
+
   const [searchParams] = useSearchParams();
   const complaintId = searchParams.get('id');
   const navigate = useNavigate();
@@ -39,8 +44,14 @@ const TrackComplaint = () => {
     const loadComplaint = async () => {
       try {
         if (!complaintId) throw new Error('No complaint ID provided');
-        const response = await fetchComplaintById(complaintId);
-        const complaintData = response.data?.data;
+        let response;
+        if (userType == "USER") {
+          response = await fetchComplaintById(complaintId);
+        } else if (userType == "ADMIN") {
+          response = await trackComplaint(complaintId)
+        }
+
+        const complaintData = response.data;
 
         if (!complaintData) throw new Error('No complaint data received');
 
@@ -182,6 +193,8 @@ const TrackComplaint = () => {
           <p className="text-yellow-700">{complaint.adminComment}</p>
         </div>
       )}
+
+      {/* //:::::::::::: Create Only for admin :::::::::::: */}
 
       {statusForm.show && (
         <div className="bg-gray-100 p-4 rounded-lg mb-8">

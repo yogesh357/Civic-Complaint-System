@@ -8,20 +8,21 @@ const SubmitComplaint = () => {
   const navigate = useNavigate();
   const [submissionStatus, setSubmissionStatus] = React.useState(null);
 
- 
+
   const handleSubmit = async (complaint) => {
     try {
       setSubmissionStatus('submitting');
       const response = await addComplaint(complaint);
+      console.log("complaint response", response)
 
       // Ensure we have the ID before navigating
-      if (!response?.id) {
+      if (!response?.data.id) {
         throw new Error('No ID received in response');
       }
 
       console.log("Submitted complaint:", response);
       setSubmissionStatus('success');
-      navigate(`/track-complaint?id=${response.id}`);
+      navigate(`/track-complaint?id=${response.data.id}`);
 
     } catch (error) {
       console.error("Submission error:", error);

@@ -1,9 +1,10 @@
 
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, use, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchUser, logoutUser } from '../services/userApi';
 import { toast } from 'react-toastify';
+import { adminLogout, currentAdmin } from '../services/adminApi';
 
 const AuthContext = createContext();
 
@@ -22,7 +23,14 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     setUser(null);
     setUserType(null);
-    const data = await logoutUser();
+    let data;
+    if (userType == "USER") {
+      data = await logoutUser();
+    }
+    if (userType == "ADMIN") {
+      data = await adminLogout()
+    }
+    navigate('/')
     if (data.success) toast.success(data.message);
   };
 
@@ -43,24 +51,138 @@ export function AuthProvider({ children }) {
   //   }
   // };
 
+  // const fetchAdmin = async () => {
+  //   try {
+  //     const { data } = await currentAdmin();
+  //     if (data.success) {
+  //       setUser(data.data);  // not data.user
+  //       setUserType('ADMIN');
+  //     }
+  //   } catch (err) {
+  //     setUser(null);
+  //     setUserType(null);
+  //   }
+  // };
+
+
   const getUser = async () => {
     try {
-      const endpoint = userType === 'ADMIN' ? '/api/admin/is-auth' : '/api/user/is-auth';
-      const data = await axiosInstance.get(endpoint);
-      if (data.success) {
-        setUser(data.user);
-        setUserType(data.user.role?.toUpperCase());
+      if (userType === 'ADMIN') {
+        const adminRes = await currentAdmin();
+        if (adminRes?.data?.success) {
+          setUser(adminRes.data.data); // data.data is correct for your response
+          setUserType('ADMIN');
+          return;
+        }
+      } else if (userType === 'USER') {
+        const userRes = await fetchUser();
+        if (userRes?.success) {
+          setUser(userRes.user);
+          setUserType(userRes.user.role?.toUpperCase() || 'USER');
+          return;
+        }
+      } else {
+        // If userType is not set yet (e.g., on initial load), try both
+        try {
+          const adminRes = await currentAdmin();
+          if (adminRes?.data?.success) {
+            setUser(adminRes.data.data);
+            setUserType('ADMIN');
+            return;
+          }
+        } catch (_) {
+          // ignore
+        }
+
+        try {
+          const userRes = await fetchUser();
+          if (userRes?.success) {
+            setUser(userRes.user);
+            setUserType(userRes.user.role?.toUpperCase() || 'USER');
+            return;
+          }
+        } catch (_) {
+          // ignore
+        }
       }
-    } catch (error) {
+    } catch (err) {
+      // All attempts failed
       setUser(null);
       setUserType(null);
-      toast.error(error?.response?.data?.message || "Authentication error");
     }
   };
 
+  // const getUser = async () => {
+  //   try {
+  //     // Clear previous state while loading
+  //     setUser(null);
+  //     setUserType(null);
+
+  //     // First try user endpoint (most common case)
+  //     try {
+  //       const userRes = await fetchUser();
+  //       if (userRes?.success) {
+  //         setUser(userRes.user);
+  //         const role = userRes.user.role?.toUpperCase() || 'USER';
+  //         setUserType(role);
+  //         return;
+  //       }
+  //     } catch (userError) {
+  //       console.debug('User auth failed, trying admin:', userError);
+  //     }
+
+  //     // Only try admin if userType was explicitly set to ADMIN
+  //     // or if we have no userType yet (initial load)
+  //     if (!userType || userType === 'ADMIN') {
+  //       try {
+  //         const adminRes = await currentAdmin();
+  //         if (adminRes?.data?.success) {
+  //           setUser(adminRes.data.data);
+  //           setUserType('ADMIN');
+  //           return;
+  //         }
+  //       } catch (adminError) {
+  //         console.debug('Admin auth failed:', adminError);
+  //       }
+  //     }
+
+  //     // All attempts failed
+  //     throw new Error('Authentication failed');
+  //   } catch (err) {
+  //     setUser(null);
+  //     setUserType(null);
+  //     console.error('Authentication error:', err);
+  //   }
+  // };
+
+  // const getUser = async () => {
+  //   try {
+  //     let data;
+  //     if (userType == "USER") {
+  //       data = await fetchUser()
+  //     } else if (userType == "ADMIN") {
+  //       data = await currentAdmin()
+  //     }
+  //     console.log("user data from current get user", data)
+  //     if (data.success) {
+  //       setUser(data)
+  //     }
+  //   } catch (err) {
+  //     setUser(null);
+  //     setUserType(null);
+  //     console.error('Authentication error:', err);
+  //   }
+  // }
+
+
+
   useEffect(() => {
     getUser();
+    // fetchAdmin()
   }, []);
+
+ 
+
 
 
   useEffect(() => {
@@ -106,4 +228,3 @@ export function useAuthContext() {
   return context;
 }
 
- 

@@ -35,7 +35,7 @@ export const updateComplaintStatus = async (complaintId, status) => {
 }
 
 export const getUserComplaint = async () => {
-  const respone = await axiosInstance.get('/api/complaints/')  
+  const respone = await axiosInstance.get('/api/complaints/')   
   return respone.data.data;
 }
 
@@ -43,6 +43,12 @@ export const getUserComplaint = async () => {
 // delete complaint 
 export const deleteComplaint = async () => {
   return axiosInstance.delete('/api/complaints/:id')
+}
+
+// getting all complaints for admin
+export const getAllComplaint = async ()=>{
+  const res = await axiosInstance.get('/api/admin/complaints')
+  return res.data
 }
 
 

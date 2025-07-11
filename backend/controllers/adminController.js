@@ -45,7 +45,7 @@ export const login = async (req, res, next) => {
             process.env.JWT_SECRET,
             { expiresIn: '8h' }
         );
- 
+
 
         res.cookie('token', token, {
             httpOnly: true,
@@ -193,8 +193,27 @@ export const register = async (req, res, next) => {
     }
 };
 
+export const logoutAdmin = (req, res) => {
+    try {
+        // YOUR ORIGINAL COOKIE CLEARING CODE (unchanged)
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+        });
+
+        return res.json({ success: true, message: 'Logged out' });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: 'Logout failed'
+        });
+    }
+};
 // Get current admin profile
-export const getProfile = async (req, res, next) => { 
+export const getProfile = async (req, res, next) => {
     try {
         const admin = await prisma.user.findUnique({
             where: { id: req.user.userId },
@@ -207,11 +226,13 @@ export const getProfile = async (req, res, next) => {
                 createdAt: true
             }
         });
- 
+
 
         if (!admin || admin.role !== 'ADMIN') {
             throw new ForbiddenError('Admin not found');
         }
+
+
 
         res.json({ success: true, data: admin });
     } catch (error) {
@@ -273,6 +294,42 @@ export const updateComplaintStatus = async (req, res, next) => {
         next(error);
     }
 };
+
+// get complaint with id
+export const getComplaintById = async (req, res, next) => {
+    try {
+
+        const complaintId = typeof req.params.id === 'string'
+            ? parseInt(req.params.id, 10)
+            : NaN;
+
+        if (isNaN(complaintId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid complaint ID format - must be a number"
+            });
+        }
+
+        const complaint = await prisma.complaint.findUnique({
+            where: { id: complaintId },
+            include: {
+                user: {
+                    select: { name: true, email: true }
+                }
+            } 
+
+        });
+
+        if (!complaint) {
+            return res.status(404).json({ success: false, message: 'Complaint not found' });
+        }
+
+        res.json({ success: true, data: complaint });
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 // User management
 export const manageUsers = async (req, res, next) => {
