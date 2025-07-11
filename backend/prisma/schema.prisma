@@ -1,33 +1,3 @@
-// generator client {
-//   provider = "prisma-client-js"
-//   // output   = "../generated/prisma"
-// }
-
-// datasource db {
-//   provider = "postgresql"
-//   url      = env("DATABASE_URL")
-// }
-
-// model User {
-//   id        Int       @id @default(autoincrement())
-//   username  String    @unique
-//   email     String    @unique
-//   mobileNo  String?   @unique
-//   password String
-//   location Location[] 
-//   createdAt DateTime  @default(now())
-// }
-
-// model Location {
-//   id      Int    @id @default(autoincrement())
-//   street  String
-//   city    String
-//   state   String
-//   zipCode String
-//   userId  Int
-//   user    User   @relation(fields: [userId], references: [id])  
-// }
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -50,26 +20,17 @@ enum Status {
   IN_PROGRESS
   RESOLVED
   REJECTED
-} 
+}
+
 enum Category {
   POTHOLE
   WATER
   STREETLIGHT
-  WASTE 
+  WASTE
   SEWAGE
   OTHER
 }
 
-// model User {
-//   id         Int         @id @default(autoincrement())
-//   name       String?
-//   email      String      @unique
-//   password   String
-//   role       Role        @default(USER)
-//   complaints Complaint[]
-//   createdAt  DateTime    @default(now())
-//   updatedAt  DateTime    @updatedAt
-// }
 model User {
   id       Int     @id @default(autoincrement())
   name     String?
@@ -80,23 +41,25 @@ model User {
   // Admin-specific fields
   isActive   Boolean     @default(true)
   complaints Complaint[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Complaint Model (core entity)
 model Complaint {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  location    String?
-  imageUrl    String? // Store image path or URL
-  status      Status   @default(PENDING)
-  category    Category
-  userId      Int // Who submitted the complaint
-  user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String
+  location     String?
+  imageUrl     String? // Store image path or URL
+  status       Status   @default(PENDING)
+  category     Category
+  userId       Int // Who submitted the complaint
+  adminComment String?
+  user         User     @relation(fields: [userId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Admin {

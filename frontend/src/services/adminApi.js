@@ -29,8 +29,10 @@ export const fetchAllComplaints = async () => {
     return response.data
 }
 
-export const updateComplaintStatus = async (complaintId, status) => {
-    return await axiosInstance.patch(`/api/admin/complaint/${complaintId}/status`, { status })
+export const updateComplaintStatus = async (complaintId, status, adminComment) => {
+    const response = await axiosInstance.patch(`/api/admin/complaint/${complaintId}/status`, { status, adminComment })
+    console.log("data from update status", response)
+    return response.data.data
 }
 
 export const fetchAllUsers = async () => {

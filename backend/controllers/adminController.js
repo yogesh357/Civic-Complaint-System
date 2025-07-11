@@ -277,7 +277,7 @@ export const getAllComplaints = async (req, res, next) => {
 export const updateComplaintStatus = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status, adminComment } = req.body;
 
         const validStatus = ['PENDING', 'IN_PROGRESS', 'RESOLVED', 'REJECTED'];
         if (!validStatus.includes(status)) {
@@ -286,7 +286,10 @@ export const updateComplaintStatus = async (req, res, next) => {
 
         const complaint = await prisma.complaint.update({
             where: { id: parseInt(id) },
-            data: { status }
+            data: {
+                status,
+                adminComment  
+            }
         });
 
         res.json({ success: true, data: complaint });
@@ -316,10 +319,10 @@ export const getComplaintById = async (req, res, next) => {
                 user: {
                     select: { name: true, email: true }
                 }
-            } 
+            }
 
         });
- 
+
         if (!complaint) {
             return res.status(404).json({ success: false, message: 'Complaint not found' });
         }

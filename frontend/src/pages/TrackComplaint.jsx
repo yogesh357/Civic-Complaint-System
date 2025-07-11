@@ -2,17 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import StatusTracker from '../components/StatusTracker';
-import { fetchComplaintById, updateComplaintStatus } from '../services/complaintApi';
+import { fetchComplaintById, } from '../services/complaintApi';
 import { useAuthContext } from '../context/AuthContext';
-import { trackComplaint } from '../services/adminApi';
+import { trackComplaint, updateComplaintStatus } from '../services/adminApi';
+
+// const statusOptions = [
+//   { value: 'submitted', label: 'Submitted', color: 'bg-gray-300' },
+//   { value: 'under_review', label: 'Under Review', color: 'bg-blue-300' },
+//   { value: 'in_progress', label: 'In Progress', color: 'bg-yellow-300' },
+//   { value: 'resolved', label: 'Resolved', color: 'bg-green-300' },
+//   { value: 'rejected', label: 'Rejected', color: 'bg-red-300' }
+// ];
 
 const statusOptions = [
-  { value: 'submitted', label: 'Submitted', color: 'bg-gray-300' },
-  { value: 'under_review', label: 'Under Review', color: 'bg-blue-300' },
-  { value: 'in_progress', label: 'In Progress', color: 'bg-yellow-300' },
-  { value: 'resolved', label: 'Resolved', color: 'bg-green-300' },
-  { value: 'rejected', label: 'Rejected', color: 'bg-red-300' }
+  { value: 'PENDING', label: 'Submitted', color: 'bg-gray-300' },
+  { value: 'IN_PROGRESS', label: 'In Progress', color: 'bg-yellow-300' },
+  { value: 'RESOLVED', label: 'Resolved', color: 'bg-green-300' },
+  { value: 'REJECTED', label: 'Rejected', color: 'bg-red-300' }
 ];
+
 
 const getStatusMeta = (value) => {
   return statusOptions.find((s) => s.value === value) || {
@@ -67,14 +75,19 @@ const TrackComplaint = () => {
     loadComplaint();
   }, [complaintId]);
 
+
   const handleStatusUpdate = async (e) => {
     e.preventDefault();
     setStatusForm((prev) => ({ ...prev, loading: true }));
     try {
-      const updatedComplaint = await updateComplaintStatus(complaintId, {
-        status: statusForm.newStatus,
-        adminComment: statusForm.comment
-      });
+
+
+      const updatedComplaint = await updateComplaintStatus(
+        complaintId,
+        statusForm.newStatus,
+        statusForm.comment
+
+      );
       toast.success('Status updated successfully!');
       setComplaint(updatedComplaint);
       setStatusForm({ show: false, loading: false, newStatus: updatedComplaint.status, comment: '' });

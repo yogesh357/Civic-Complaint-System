@@ -40,7 +40,7 @@ router.get('/profile', getProfile); // for getting current admin profile
 // Complaint management routes
 router.get('/complaints', getAllComplaints);
 router.get('/complaint/:id', getComplaintById)
-router.patch('/complaints/:id/status', updateComplaintStatus);
+router.patch('/complaint/:id/status', updateComplaintStatus);
 
 // User management routes
 router.get('/users', manageUsers); // GET - List users 
