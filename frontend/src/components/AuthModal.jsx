@@ -52,11 +52,8 @@ function AuthModal() {
             if (responseData.success) {
                 console.log("logged in ..")
                 const userInfo = responseData.user || responseData.data; // works for both user and admin
-                setUser(userInfo);
-                console.log("userInfo :", userInfo)
-                // setUser(responseData.user);
-                console.log("user from auth modal ", user)
-                // const role = responseData.user.role?.toUpperCase(); // "USER" or "ADMIN"
+                setUser(userInfo); 
+                console.log("user from auth modal ", user) 
                 const role = userInfo.role?.toUpperCase(); // "USER" or "ADMIN"
                 setUserType(role);
 

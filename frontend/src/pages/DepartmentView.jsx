@@ -11,15 +11,15 @@ const DepartmentView = () => {
   useEffect(()=>{
     
   })
-  // const { user } = useAuthContext();
+  const { user } = useAuthContext();
 
-  // if (!user || user.type !== 'department') {
+  // if (!user || user.type !== 'USER') {
   //   return <Unauthorized />;
   // }
 
   return (
     <div className="department-view">
-      <DepartmentDashboard initialComplaints={complaints} />
+      <DepartmentDashboard complaints={complaints} />
     </div>
   );
 };

@@ -180,12 +180,15 @@ import ComplaintList from '../components/ComplaintList';
 import { useComplaintContext } from '../context/ComplaintContext';
 import { useAuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import ComplaintCard from '../components/ComplaintCard';
 
 const HomePage = () => {
   const { complaints, loading, error } = useComplaintContext();
   const { user, setShowAuthModal, setAuthModalType, userType } = useAuthContext();
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const navigate = useNavigate();
+
+  const homeComplaints = complaints.slice(0, 5)
 
   if (loading) return <div className="text-center py-10 text-lg font-medium text-blue-600">Loading complaints...</div>;
   if (error) return <div className="text-red-600 text-center py-10 font-medium">Error: {error}</div>;
@@ -255,14 +258,14 @@ const HomePage = () => {
             {complaints.length > 5 && (
               <button
                 className="text-blue-600 font-medium hover:underline"
-                onClick={() => navigate('/complaints')}
+                onClick={() => navigate('/my-complaint')}
               >
                 View All
               </button>
             )}
           </div>
-          <ComplaintList
-            complaints={complaints.slice(0, 5)}
+          <ComplaintCard
+            complaints={complaints.slice(0, 6)}
             onSelect={setSelectedComplaint}
             selectedId={selectedComplaint?.id}
           />
@@ -270,7 +273,7 @@ const HomePage = () => {
       }
 
       {/* How It Works */}
-      <section className="bg-gray-100 p-8 rounded-2xl shadow-md">
+      <section className="bg-gray-100 p-8 rounded-2xl shadow-lg">
         <h2 className="text-2xl font-semibold text-center mb-8 text-gray-800">How ReportHub Works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
@@ -290,7 +293,7 @@ const HomePage = () => {
               desc: 'Municipality teams address prioritized complaints',
             },
           ].map((step) => (
-            <div key={step.number} className="bg-white p-6 rounded-xl text-center shadow">
+            <div key={step.number} className="bg-white p-6 rounded-xl text-center shadow-even shadow-even-hover transition-shadow">
               <div className="text-4xl font-bold text-blue-600 mb-2">{step.number}</div>
               <h3 className="text-xl font-semibold text-gray-800">{step.title}</h3>
               <p className="mt-2 text-gray-600">{step.desc}</p>

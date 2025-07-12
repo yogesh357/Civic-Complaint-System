@@ -4,7 +4,7 @@ import { createContext, use, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchUser, logoutUser } from '../services/userApi';
 import { toast } from 'react-toastify';
-import { adminLogout, currentAdmin } from '../services/adminApi';
+import { adminLogout, currentAdmin, getAllUsers } from '../services/adminApi';
 
 const AuthContext = createContext();
 
@@ -14,6 +14,8 @@ export function AuthProvider({ children }) {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalType, setAuthModalType] = useState('user');
   const [userType, setUserType] = useState(null);
+
+  const [allUsers, setAllUsers] = useState([])
 
   const login = (userData, type) => {
     setUser(userData);
@@ -63,6 +65,36 @@ export function AuthProvider({ children }) {
   //     setUserType(null);
   //   }
   // };
+
+
+ 
+
+  const fetchAllUsers = async () => {
+    try {
+      const response = await getAllUsers();
+      console.log("API response:", response); // Debug log
+
+      if (response?.success && Array.isArray(response.data)) {
+        const formattedUsers = response.data.map(user => ({
+          id: user._id || user.id,
+          name: user.name || 'Unknown',
+          email: user.email || 'No email',
+          isOnline: false,
+          // Include any other fields you need
+          ...user // Spread the rest of the user object
+        }));
+
+        setAllUsers(formattedUsers);
+        console.log("Formatted users:", formattedUsers); // Debug log
+        return formattedUsers;
+      }
+      throw new Error('Invalid users data format');
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Failed to load users');
+      throw error;
+    }
+  };
 
 
   const getUser = async () => {
@@ -181,7 +213,20 @@ export function AuthProvider({ children }) {
     // fetchAdmin()
   }, []);
 
- 
+  useEffect(() => {
+    const loadUsers = async () => {
+      if (userType === 'ADMIN') {
+        try {
+          await fetchAllUsers();
+        } catch (error) {
+          console.error('Failed to load users:', error);
+        }
+      }
+    };
+
+    loadUsers();
+  }, [userType]); // Only depend on userType
+
 
 
 
@@ -189,15 +234,15 @@ export function AuthProvider({ children }) {
     if (user) console.log("🔥 AuthContext user updated:", user);
   }, [user]);
 
-  useEffect(() => {
-    if (!user || !userType) return;
+  // useEffect(() => {
+  //   if (!user || !userType) return;
 
-    if (userType === 'ADMIN') {
-      navigate('/department');
-    } else if (userType === 'USER') {
-      navigate('/');
-    }
-  }, [userType]);
+  //   if (userType === 'ADMIN') {
+  //     navigate('/');
+  //   } else if (userType === 'USER') {
+  //     navigate('/');
+  //   }
+  // }, [userType]);
 
   return (
     <AuthContext.Provider
@@ -213,6 +258,8 @@ export function AuthProvider({ children }) {
         setUser,
         setUserType,
         navigate,
+        allUsers,
+        fetchAllUsers
       }}
     >
       {children}

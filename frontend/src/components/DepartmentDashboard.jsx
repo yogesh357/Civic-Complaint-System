@@ -2,15 +2,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { ErrorBoundary } from 'react-error-boundary';
-import ComplaintMap from './ComplaintMap';
-import ComplaintList from './ComplaintList';
-import ClusterAnalysis from './ClusterAnalysis';
 import { updateComplaintStatus } from '../services/complaintApi';
-
+import ComplaintCard from './ComplaintCard';
+import ClusterAnalysis from './ClusterAnalysis';
 
 const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {
-  // Initialize state with props only once
-  const [complaints, setComplaints] = useState(initialComplaints || []);
+  const [complaints, setComplaints] = useState(initialComplaints);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [view, setView] = useState('list');
   const [filter, setFilter] = useState('all');
@@ -19,7 +16,6 @@ const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {
 
   // Update complaints when props change
   useEffect(() => {
-    // Compare lengths and first item to avoid unnecessary updates
     if (initialComplaints.length !== complaints.length ||
       initialComplaints[0]?.id !== complaints[0]?.id) {
       setComplaints(initialComplaints || []);
@@ -33,15 +29,17 @@ const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {
     );
   }, [complaints, filter]);
 
-  // Calculate stats efficiently
+  // Stats for header
+  
   const stats = useMemo(() => ({
     total: complaints.length,
-    pending: complaints.filter(c => c.status === 'pending').length,
-    inProgress: complaints.filter(c => c.status === 'in-progress').length,
-    resolved: complaints.filter(c => c.status === 'resolved').length
+    PENDING: complaints.filter(c => c.status === 'PENDING').length,
+    IN_PROGRESS: complaints.filter(c => c.status === 'IN_PROGRESS').length,
+    RESOLVED: complaints.filter(c => c.status === 'RESOLVED').length,
+    REJECTED: complaints.filter(c => c.status === 'REJECTED').length
   }), [complaints]);
 
-  // Handle status changes
+
   const handleStatusChange = async (complaintId, newStatus) => {
     if (!complaintId) return;
 
@@ -50,11 +48,9 @@ const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {
 
     try {
       const updatedComplaint = await updateComplaintStatus(complaintId, newStatus);
-
       setComplaints(prev =>
         prev.map(c => c.id === complaintId ? updatedComplaint : c)
       );
-
       setSelectedComplaint(updatedComplaint);
       toast.success('Status updated successfully!');
     } catch (error) {
@@ -66,7 +62,6 @@ const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {
     }
   };
 
-  // Error boundary fallback component
   const ErrorFallback = ({ error }) => (
     <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
       <h3 className="text-red-800 font-medium">Something went wrong</h3>
@@ -82,23 +77,22 @@ const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      {/* Loading overlay */}
       {isLoading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       )}
 
-      {/* Header Section */}
-      <header className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <header className="bg-white rounded-2xl shadow-sm p-6 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Department Dashboard</h1>
-            <div className="flex flex-wrap gap-4 mt-2">
+            <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">📊 Department Dashboard</h1>
+            <div className="flex flex-wrap gap-4 mt-4">
               <StatCard label="Total" value={stats.total} />
-              <StatCard label="Pending" value={stats.pending} variant="warning" />
-              <StatCard label="In Progress" value={stats.inProgress} variant="info" />
-              <StatCard label="Resolved" value={stats.resolved} variant="success" />
+              <StatCard label="Pending" value={stats.PENDING} variant="warning" />
+              <StatCard label="In Progress" value={stats.IN_PROGRESS} variant="info" />
+              <StatCard label="Resolved" value={stats.RESOLVED} variant="success" />
+              <StatCard label="Rejected" value={stats.REJECTED} variant="success" />
             </div>
           </div>
 
@@ -109,23 +103,21 @@ const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 disabled={isUpdating}
-                className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="all">All Complaints</option>
+                {/* <option value="all">All Complaints</option>
                 <option value="pending">Pending</option>
                 <option value="in-progress">In Progress</option>
-                <option value="resolved">Resolved</option>
+                <option value="resolved">Resolved</option> */}
+                <option value="all">All Complaints</option>
+                <option value="PENDING">Pending</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="RESOLVED">Resolved</option>
+                <option value="REJECTED">REJECTED</option>
               </select>
             </div>
 
-            <div className="flex border rounded-md overflow-hidden">
-              {/* <ViewToggleButton
-                active={view === 'map'}
-                onClick={() => setView('map')}
-                icon="map"
-                label="Map"
-                disabled={isUpdating}
-              /> */}
+            <div className="inline-flex rounded-md shadow-sm border border-gray-200 overflow-hidden">
               <ViewToggleButton
                 active={view === 'list'}
                 onClick={() => setView('list')}
@@ -145,39 +137,26 @@ const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="grid grid-cols-1   gap-6">
+      <main className="grid grid-cols-1 gap-6">
         <div className={`lg:col-span-${selectedComplaint ? '2' : '3'}`}>
           <ErrorBoundary FallbackComponent={ErrorFallback}>
-            {/* {view === 'map' && (
-              <ComplaintMap
-                complaints={filteredComplaints}
-                center={selectedComplaint?.location}
-                onMarkerClick={setSelectedComplaint}
-              />
-            )} */}
-
             {view === 'list' && (
-              <ComplaintList
+              <ComplaintCard
                 complaints={filteredComplaints}
                 onSelect={setSelectedComplaint}
                 selectedId={selectedComplaint?.id}
               />
             )}
-
             {view === 'analysis' && (
               <ClusterAnalysis complaints={filteredComplaints} />
             )}
           </ErrorBoundary>
         </div>
 
-        {/* Complaint Detail Sidebar */}
         {selectedComplaint && (
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="border-b p-4 flex justify-between items-center">
-              <h2 className="text-lg font-semibold">
-                Complaint #{selectedComplaint.id}
-              </h2>
+              <h2 className="text-lg font-semibold">Complaint #{selectedComplaint.id}</h2>
               <button
                 onClick={() => setSelectedComplaint(null)}
                 className="text-gray-500 hover:text-gray-700"
@@ -202,15 +181,11 @@ const DepartmentDashboard = ({ complaints: initialComplaints = [] }) => {
               </DetailSection>
 
               <DetailSection label="Description">
-                <p className="text-gray-700">
-                  {selectedComplaint.description || 'No description provided'}
-                </p>
+                <p className="text-gray-700">{selectedComplaint.description || 'No description provided'}</p>
               </DetailSection>
 
               <DetailSection label="Location">
-                <p className="text-gray-700">
-                  {selectedComplaint.location?.address || 'No address provided'}
-                </p>
+                <p className="text-gray-700">{selectedComplaint.location?.address || 'No address provided'}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   {selectedComplaint.location?.latitude?.toFixed(6)},
                   {selectedComplaint.location?.longitude?.toFixed(6)}
@@ -277,34 +252,28 @@ const StatCard = ({ label, value, variant = 'default' }) => {
   );
 };
 
-const ViewToggleButton = ({ active, onClick, icon, label, disabled }) => {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      aria-pressed={active}
-      className={`px-3 py-2 text-sm font-medium flex items-center gap-1 ${active
-        ? 'bg-blue-500 text-white'
-        : 'bg-white text-gray-700 hover:bg-gray-100'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-    >
-      <i className={`fas fa-${icon}`}></i>
-      {label}
-    </button>
-  );
-};
+const ViewToggleButton = ({ active, onClick, icon, label, disabled }) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    aria-pressed={active}
+    className={`px-3 py-2 text-sm font-medium flex items-center gap-1 ${active
+      ? 'bg-blue-500 text-white'
+      : 'bg-white text-gray-700 hover:bg-gray-100'
+      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+  >
+    <i className={`fas fa-${icon}`}></i>
+    {label}
+  </button>
+);
 
-const DetailSection = ({ label, children }) => {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-      </label>
-      <div className="mt-1">
-        {children}
-      </div>
-    </div>
-  );
-};
+const DetailSection = ({ label, children }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      {label}
+    </label>
+    <div className="mt-1">{children}</div>
+  </div>
+);
 
 export default React.memo(DepartmentDashboard);

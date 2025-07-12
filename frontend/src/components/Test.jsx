@@ -42,6 +42,11 @@ const Test = () => {
         <div>
             <button className='py-5 px-10 bg-gray-700 text-2xl font-bold mx-10 rounded-2xl hover:bg-gray-400 hover:text-white' onClick={demo}>Click me</button>
             <button className='py-5 px-10 bg-gray-700 text-2xl font-bold mx-10 rounded-2xl hover:bg-gray-400 hover:text-white' onClick={load}>loading test</button>
+
+
+            <div className='h-15 w-15 bg-blue-400 hover:bg-blue-800 transition-colors'>
+                test box
+            </div>
         </div>
     );
 };

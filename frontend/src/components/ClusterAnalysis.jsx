@@ -3,7 +3,6 @@ import { Scatter } from 'react-chartjs-2';
 import { Chart as ChartJS } from 'chart.js/auto';
 
 const ClusterAnalysis = ({ complaints }) => {
-  // This is a simplified example - in a real app you'd get clustered data from your backend
   const clusterData = {
     clusters: [
       {
@@ -26,10 +25,8 @@ const ClusterAnalysis = ({ complaints }) => {
           })),
         backgroundColor: 'rgba(54, 162, 235, 0.6)',
       },
-      // Add more clusters as needed
     ],
     hotspots: [
-      // Areas with high concentration of issues
       { x: 51.505, y: -0.09, radius: 15, label: 'Hotspot 1' }
     ]
   };
@@ -47,9 +44,25 @@ const ClusterAnalysis = ({ complaints }) => {
   };
 
   const options = {
+    responsive: true,
+    maintainAspectRatio: false,
     scales: {
-      x: { title: { display: true, text: 'Latitude' } },
-      y: { title: { display: true, text: 'Longitude' } }
+      x: {
+        title: {
+          display: true,
+          text: 'Latitude',
+          font: { size: 14 }
+        },
+        ticks: { color: '#555' }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Longitude',
+          font: { size: 14 }
+        },
+        ticks: { color: '#555' }
+      }
     },
     plugins: {
       tooltip: {
@@ -63,20 +76,31 @@ const ClusterAnalysis = ({ complaints }) => {
             return label;
           }
         }
+      },
+      legend: {
+        labels: {
+          font: { size: 12 },
+          color: '#333'
+        }
       }
     }
   };
 
   return (
-    <div className="cluster-analysis">
-      <h3>AI-Powered Issue Clustering</h3>
-      <div className="chart-container">
+    <div className="bg-white rounded-lg shadow p-6 space-y-6">
+      <h3 className="text-2xl font-semibold text-gray-800 border-b pb-2">
+        📍 AI-Powered Issue Clustering
+      </h3>
+
+      <div className="h-[400px] border rounded-md overflow-hidden p-2 bg-gray-50">
         <Scatter data={data} options={options} />
       </div>
-      
-      <div className="insights">
-        <h4>Resource Allocation Recommendations</h4>
-        <ul>
+
+      <div className="bg-gray-100 p-4 rounded-lg">
+        <h4 className="text-lg font-medium text-gray-700 mb-2">
+          🧠 Resource Allocation Recommendations
+        </h4>
+        <ul className="list-disc list-inside text-gray-600 space-y-1 text-sm">
           <li>Prioritize pothole repairs in the downtown area (Hotspot 1)</li>
           <li>Schedule streetlight maintenance along Main Street</li>
           <li>Deploy additional garbage bins in the park district</li>

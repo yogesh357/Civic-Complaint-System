@@ -25,7 +25,7 @@ export const currentAdmin = async () => {
 
 export const fetchAllComplaints = async () => {
     const response = await axiosInstance.get('/api/admin/complaints')
-    console.log("admin api ", response)
+
     return response.data
 }
 
@@ -35,8 +35,9 @@ export const updateComplaintStatus = async (complaintId, status, adminComment) =
     return response.data.data
 }
 
-export const fetchAllUsers = async () => {
-    return await axiosInstance.get('/api/admin/users')
+export const getAllUsers = async () => {
+    const response = await axiosInstance.get('/api/admin/users')
+    return response.data
 }
 
 export const trackComplaint = async (id) => {
