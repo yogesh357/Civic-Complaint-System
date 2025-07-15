@@ -1,10 +1,12 @@
 import express from 'express';
 import userRouter from './routes/userRoutes.js';
 import complaintRouter from './routes/complaintRoutes.js';
-import adminRouter from './routes/adminRoutes.js'; // Add this import
+import adminRouter from './routes/adminRoutes.js';
+import aiRouter from './routes/aiRouter.js';
+
 import errorHandler from './middlewares/errorHandler.js';
 import cookieParser from 'cookie-parser';
-import cors from 'cors'
+import cors from 'cors';
 
 const app = express();
 
@@ -54,6 +56,9 @@ app.use('/api/user', userRouter);
 app.use('/api/complaints', complaintRouter);
 
 app.use('/api/admin', adminRouter); // All admin routes will be under /api/admin
+
+// route for ai estimation
+app.use('/api', aiRouter)
 
 // Error handling middleware
 app.use(errorHandler);
