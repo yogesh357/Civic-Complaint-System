@@ -6,13 +6,6 @@ import { fetchComplaintById, } from '../services/complaintApi';
 import { useAuthContext } from '../context/AuthContext';
 import { trackComplaint, updateComplaintStatus } from '../services/adminApi';
 
-// const statusOptions = [
-//   { value: 'submitted', label: 'Submitted', color: 'bg-gray-300' },
-//   { value: 'under_review', label: 'Under Review', color: 'bg-blue-300' },
-//   { value: 'in_progress', label: 'In Progress', color: 'bg-yellow-300' },
-//   { value: 'resolved', label: 'Resolved', color: 'bg-green-300' },
-//   { value: 'rejected', label: 'Rejected', color: 'bg-red-300' }
-// ];
 
 const statusOptions = [
   { value: 'PENDING', label: 'Submitted', color: 'bg-gray-300' },
@@ -53,18 +46,19 @@ const TrackComplaint = () => {
       try {
         if (!complaintId) throw new Error('No complaint ID provided');
         let response;
-        if (userType == "USER") {
+        if (userType == "USER") { 
           response = await fetchComplaintById(complaintId);
         } else if (userType == "ADMIN") {
           response = await trackComplaint(complaintId)
-        }
+        } 
 
         const complaintData = response.data;
 
         if (!complaintData) throw new Error('No complaint data received');
 
-        setComplaint(complaintData);
+        setComplaint(complaintData); 
         setStatusForm((prev) => ({ ...prev, newStatus: complaintData.status }));
+        setError(null)
       } catch (err) {
         setError(err.message);
       } finally {
@@ -73,7 +67,7 @@ const TrackComplaint = () => {
     };
 
     loadComplaint();
-  }, [complaintId]);
+  }, [complaintId,userType]);
 
 
   const handleStatusUpdate = async (e) => {
@@ -107,8 +101,8 @@ const TrackComplaint = () => {
     );
   }
 
-  if (error) {
-    return (
+  { error &&
+     (
       <div className="max-w-4xl mx-auto p-6">
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
           <p className="font-bold">Error</p>
@@ -176,11 +170,11 @@ const TrackComplaint = () => {
           </div>
         </div>
 
-        {complaint.image ? (
+        {complaint.imageUrl ? (
           <div className="mt-4">
             <p className="text-gray-600 font-medium mb-2">Evidence:</p>
             <img
-              src={complaint.image}
+              src={complaint.imageUrl}
               alt="Complaint evidence"
               className="max-w-full h-auto max-h-64 rounded-lg border border-gray-200"
             />

@@ -1,7 +1,9 @@
 import prisma from '../config/prisma.js';
-import cloudinary from '../config/cloudinary.js';
+
 import { NotFoundError, ForbiddenError } from '../errors/index.js';
 import { Category } from '@prisma/client';
+import cloudinary from '../config/cloudinary.js';
+
 
 // Create a new complaint
 export const addComplaint = async (req, res, next) => {
@@ -53,10 +55,22 @@ export const addComplaint = async (req, res, next) => {
 
         let imageUrl = null;
         if (req.file) {
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: 'complaints',
-            });
-            imageUrl = result.secure_url;
+            // const result = await cloudinary.uploader.upload(req.file.path, {
+            //     folder: 'complaints',
+            // });
+            // imageUrl = result.secure_url;
+            // console.log("cloudniary url :", imageUrl)
+            try {
+                console.log("File path being uploaded:", req.file.path);
+
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'complaints',
+                });
+                imageUrl = result.secure_url;
+                console.log("Cloudinary URL:", imageUrl);
+            } catch (uploadErr) {
+                console.error("Cloudinary upload failed:", uploadErr);
+            }
         }
 
         const complaint = await prisma.complaint.create({
@@ -68,11 +82,7 @@ export const addComplaint = async (req, res, next) => {
                 status: 'PENDING',
                 category,
                 userId: Number(userId)
-                // user: {
-                //     connect: {
-                //         id: Number(userId) // Relation connection
-                //     }
-                // }
+
             },
             select: {
                 id: true,
@@ -168,6 +178,7 @@ export const getComplaintDetails = async (req, res, next) => {
             select: {
                 id: true,
                 title: true,
+                user: true,
                 description: true,
                 location: true,
                 status: true,

@@ -1,14 +1,14 @@
 // import multer from "multer";
 
-
-// // we will use this to upload images to cloudinary.
+ 
 // export const upload = multer({ storage: multer.diskStorage({}) })
 
 import multer from "multer";
 import path from "path";
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const fs = require('fs');
+// const fs = require('fs');
+import fs from 'fs'
 
 // Create uploads directory if it doesn't exist
 const uploadDir = 'uploads';
@@ -50,6 +50,7 @@ const upload = multer({
         fileSize: 5 * 1024 * 1024, // 5MB limit
         files: 1 // Limit to 1 file per upload
     }
+    
 });
 
 export { upload };

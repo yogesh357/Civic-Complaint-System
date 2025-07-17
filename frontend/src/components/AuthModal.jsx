@@ -37,7 +37,7 @@ function AuthModal() {
                 } else {
                     response = await registerUser(name, email, password);
                 }
-            } else { // admin
+            } else if(authModalType == 'admin') { // admin
                 if (formState === 'login') {
                     response = await adminLogin(email, password);
                 } else {

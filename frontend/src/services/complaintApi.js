@@ -27,7 +27,9 @@ export const submitComplaint = async (complaintData) => {
 
 // get complaints by complaint id
 export const fetchComplaintById = async (complaintId) => {
-  return await axiosInstance.get(`/api/complaints/${complaintId}`)
+  const res = await axiosInstance.get(`/api/complaints/${complaintId}`)
+  console.log("response form complaint",res)
+  return res.data
 };
 
 export const updateComplaintStatus = async (complaintId, status) => {

@@ -15,9 +15,8 @@ export const adminRegistrationSchema = z.object({
         .regex(/[a-z]/, "Must contain at least one lowercase letter")
         .regex(/[0-9]/, "Must contain at least one number")
         .regex(/[^A-Za-z0-9]/, "Must contain at least one special character"),
-
-    // Removed role selection (automatically set to 'ADMIN' in controller)
+ 
     department: z.string()
         .max(50, "Department cannot exceed 50 characters")
         .optional()
-}).strict(); // Prevents unknown fields
+}).strict();  

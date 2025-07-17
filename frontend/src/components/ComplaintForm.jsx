@@ -40,6 +40,32 @@ const ComplaintForm = ({ onSubmit }) => {
     }));
   };
 
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+
+  //   if (!location && !address.street) {
+  //     alert('Please provide a location for your complaint');
+  //     return;
+  //   }
+
+  //   const complaint = {
+  //     title,
+  //     category,
+  //     description,
+  //     address: {  // Change from 'location' to 'address' to match backend
+  //       street: address.street,
+  //       area: address.area,
+  //       city: address.city,
+  //       pincode: address.pincode,
+  //       landmark: address.landmark
+  //     },
+  //     image,
+  //     timestamp: new Date().toISOString()
+  //   };
+  //   onSubmit(complaint);
+  // };
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -48,22 +74,23 @@ const ComplaintForm = ({ onSubmit }) => {
       return;
     }
 
-    const complaint = {
-      title,
-      category,
-      description,
-      address: {  // Change from 'location' to 'address' to match backend
-        street: address.street,
-        area: address.area,
-        city: address.city,
-        pincode: address.pincode,
-        landmark: address.landmark
-      },
-      image,
-      timestamp: new Date().toISOString()
-    };
-    onSubmit(complaint);
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('category', category);
+    formData.append('description', description);
+    formData.append('image', image);
+
+    // Option 1: Send individual fields
+    formData.append('address[street]', address.street);
+    formData.append('address[area]', address.area);
+    formData.append('address[landmark]', address.landmark);
+    formData.append('address[city]', address.city);
+    formData.append('address[pincode]', address.pincode);
+
+    
+    onSubmit(formData);
   };
+
 
   return (
     <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-8 my-10">

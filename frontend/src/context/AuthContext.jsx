@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
   // };
 
 
- 
+
 
   const fetchAllUsers = async () => {
     try {
@@ -115,17 +115,17 @@ export function AuthProvider({ children }) {
         }
       } else {
         // If userType is not set yet (e.g., on initial load), try both
+
         try {
           const adminRes = await currentAdmin();
           if (adminRes?.data?.success) {
             setUser(adminRes.data.data);
-            setUserType('ADMIN');
+            setUserType(adminRes.data.data.role || 'ADMIN');
             return;
           }
         } catch (_) {
           // ignore
         }
-
         try {
           const userRes = await fetchUser();
           if (userRes?.success) {
@@ -144,28 +144,70 @@ export function AuthProvider({ children }) {
     }
   };
 
+
+
   // const getUser = async () => {
   //   try {
-  //     // Clear previous state while loading
-  //     setUser(null);
-  //     setUserType(null);
-
-  //     // First try user endpoint (most common case)
-  //     try {
-  //       const userRes = await fetchUser();
-  //       if (userRes?.success) {
-  //         setUser(userRes.user);
-  //         const role = userRes.user.role?.toUpperCase() || 'USER';
-  //         setUserType(role);
+  //     console.log("user type from auth context", userType)
+  //     // If userType already known, just fetch accordingly
+  //     if (userType === 'ADMIN') {
+  //       const adminRes = await currentAdmin();
+  //       if (adminRes?.data?.success) {
+  //         setUser(adminRes.data.data);
+  //         setUserType('ADMIN');
+  //         return;
+  //       } else {
+  //         setUser(null);
+  //         setUserType(null);
   //         return;
   //       }
-  //     } catch (userError) {
-  //       console.debug('User auth failed, trying admin:', userError);
   //     }
 
-  //     // Only try admin if userType was explicitly set to ADMIN
-  //     // or if we have no userType yet (initial load)
-  //     if (!userType || userType === 'ADMIN') {
+  //     if (userType === 'USER') {
+  //       const userRes = await fetchUser();
+  //       if (userRes?.success) {
+  //         console.log("user data from auth contexx", userRes)
+  //         setUser(userRes.user);
+  //         setUserType(userRes.user.role?.toUpperCase() || 'USER');
+  //         return;
+  //       } else {
+  //         setUser(null);
+  //         setUserType(null);
+  //         return;
+  //       }
+  //     }
+
+  //     // If userType not known, detect by trying admin first
+  //     const userRes = await fetchUser();
+  //     if (userRes?.success) {
+  //       setUser(userRes.user);
+  //       setUserType(userRes.user.role?.toUpperCase() || 'USER');
+  //       return;
+  //     }
+  //     const adminRes = await currentAdmin();
+  //     if (adminRes?.data?.success) {
+  //       setUser(adminRes.data.data);
+  //       setUserType('ADMIN');
+  //       return;
+  //     }
+  //     // If both fail
+  //     setUser(null);
+  //     setUserType(null);
+  //   } catch (err) {
+  //     setUser(null);
+  //     setUserType(null);
+  //   }
+  // };
+
+
+
+
+  // 
+
+  // const getUser = async () => {
+  //   try {
+  //     // 1️⃣ If userType is already known, fetch accordingly
+  //     if (userType === 'ADMIN') {
   //       try {
   //         const adminRes = await currentAdmin();
   //         if (adminRes?.data?.success) {
@@ -173,38 +215,70 @@ export function AuthProvider({ children }) {
   //           setUserType('ADMIN');
   //           return;
   //         }
-  //       } catch (adminError) {
-  //         console.debug('Admin auth failed:', adminError);
+  //       } catch (err) {
+  //         console.warn("Admin check failed:", err);
+  //       }
+  //       setUser(null);
+  //       setUserType(null);
+  //       return;
+  //     }
+
+  //     if (userType === 'USER') {
+  //       try {
+  //         const userRes = await fetchUser();
+  //         if (userRes?.success) {
+  //           console.log("user data from auth context", userRes);
+  //           setUser(userRes.user);
+  //           setUserType(userRes.user.role?.toUpperCase() || 'USER');
+  //           return;
+  //         }
+  //       } catch (err) {
+  //         console.warn("User check failed:", err);
+  //       }
+  //       setUser(null);
+  //       setUserType(null);
+  //       return;
+  //     }
+
+  //     // 2️⃣ If userType is unknown (first load), try admin first
+  //     try {
+  //       const adminRes = await currentAdmin();
+  //       if (adminRes?.data?.success) {
+  //         setUser(adminRes.data.data);
+  //         setUserType('ADMIN');
+  //         return;
+  //       }
+  //     } catch (err) {
+  //       if (err.response?.status !== 401) {
+  //         console.error("Unexpected error in currentAdmin:", err);
+  //       } else {
+  //         console.info("Admin check: not logged in as admin (401).");
   //       }
   //     }
 
-  //     // All attempts failed
-  //     throw new Error('Authentication failed');
-  //   } catch (err) {
+
+  //     try {
+  //       const userRes = await fetchUser();
+  //       if (userRes?.success) {
+  //         setUser(userRes.user);
+  //         setUserType(userRes.user.role?.toUpperCase() || 'USER');
+  //         return;
+  //       }
+  //     } catch (err) {
+  //       console.info("Not a user:", err.response?.status);
+  //     }
+
   //     setUser(null);
   //     setUserType(null);
-  //     console.error('Authentication error:', err);
+  //   } catch (err) {
+  //     console.error("Unexpected error in getUser():", err);
+  //     setUser(null);
+  //     setUserType(null);
   //   }
   // };
 
-  // const getUser = async () => {
-  //   try {
-  //     let data;
-  //     if (userType == "USER") {
-  //       data = await fetchUser()
-  //     } else if (userType == "ADMIN") {
-  //       data = await currentAdmin()
-  //     }
-  //     console.log("user data from current get user", data)
-  //     if (data.success) {
-  //       setUser(data)
-  //     }
-  //   } catch (err) {
-  //     setUser(null);
-  //     setUserType(null);
-  //     console.error('Authentication error:', err);
-  //   }
-  // }
+
+
 
 
 
