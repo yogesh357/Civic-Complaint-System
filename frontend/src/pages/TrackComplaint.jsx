@@ -5,6 +5,8 @@ import StatusTracker from '../components/StatusTracker';
 import { fetchComplaintById, } from '../services/complaintApi';
 import { useAuthContext } from '../context/AuthContext';
 import { trackComplaint, updateComplaintStatus } from '../services/adminApi';
+import axiosInstance from '../services/axiosInstance';
+import AIEstimation from '../components/AIEstimation';
 
 
 const statusOptions = [
@@ -46,17 +48,17 @@ const TrackComplaint = () => {
       try {
         if (!complaintId) throw new Error('No complaint ID provided');
         let response;
-        if (userType == "USER") { 
+        if (userType == "USER") {
           response = await fetchComplaintById(complaintId);
         } else if (userType == "ADMIN") {
           response = await trackComplaint(complaintId)
-        } 
+        }
 
         const complaintData = response.data;
 
         if (!complaintData) throw new Error('No complaint data received');
 
-        setComplaint(complaintData); 
+        setComplaint(complaintData);
         setStatusForm((prev) => ({ ...prev, newStatus: complaintData.status }));
         setError(null)
       } catch (err) {
@@ -67,7 +69,7 @@ const TrackComplaint = () => {
     };
 
     loadComplaint();
-  }, [complaintId,userType]);
+  }, [complaintId, userType]);
 
 
   const handleStatusUpdate = async (e) => {
@@ -101,18 +103,19 @@ const TrackComplaint = () => {
     );
   }
 
-  { error &&
-     (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
-          <p className="font-bold">Error</p>
-          <p>{error}</p>
+  {
+    error &&
+      (
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+            <p className="font-bold">Error</p>
+            <p>{error}</p>
+          </div>
+          <button onClick={() => navigate(-1)} className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded">
+            Go Back
+          </button>
         </div>
-        <button onClick={() => navigate(-1)} className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded">
-          Go Back
-        </button>
-      </div>
-    );
+      );
   }
 
   if (!complaint) {
@@ -128,6 +131,9 @@ const TrackComplaint = () => {
       </div>
     );
   }
+
+
+
 
   const statusMeta = getStatusMeta(complaint.status);
 
@@ -198,11 +204,8 @@ const TrackComplaint = () => {
       </div>
 
 
-
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-8">
-        <h3 className="text-lg font-semibold text-blue-800 mb-2">Estimated Resolution Time</h3>
-        <p className="text-blue-700">Based on similar issues, we expect to resolve this within 7-10 business days</p>
-      </div>
+      {/* //:AI Analyse */}
+      <AIEstimation complaintId={complaintId} />
 
       {complaint.adminComment && (
         <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200 mb-8">

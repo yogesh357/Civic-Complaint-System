@@ -1,32 +1,4 @@
-// // utils/auth.js
-// export const checkAuth = (user) => {
-//   if (!user) {
-//     throw { type: 'UNAUTHENTICATED', message: 'Please login to access this page' };
-//   }
-//   return true;
-// };
-
-// export const checkRoles = (user, allowedRoles) => {
-//   if (!allowedRoles || allowedRoles.length === 0) return true;
-
-//   if (!user?.roles?.some(role => allowedRoles.includes(role))) {
-//     throw { 
-//       type: 'UNAUTHORIZED', 
-//       message: 'You do not have permission to access this page' 
-//     };
-//   }
-//   return true;
-// };
-
-// export const verifyAccess = (user, allowedRoles) => {
-//   try {
-//     checkAuth(user);
-//     checkRoles(user, allowedRoles);
-//     return { granted: true };
-//   } catch (error) {
-//     return { granted: false, error };
-//   }
-// };
+ 
 
 export const checkAuth = (user) => {
     if (!user) {
