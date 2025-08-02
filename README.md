@@ -52,6 +52,14 @@ RequestHub is an innovative platform that enables citizens to report municipal i
 - Cloudinary account (for image uploads)
 - Perplexity AI API key
 
+### Fronend Setup
+```bash
+cd frontend
+npm install
+cp .env.example .env
+# Configure your VITE_API_BASE_URL
+npm run dev
+```
 ### Backend Setup
 ```bash
 cd backend
