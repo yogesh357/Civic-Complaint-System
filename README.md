@@ -1,6 +1,5 @@
 # RequestHub - AI-Powered Municipal Complaint Management System
-
-![Project Banner](https://i.imgur.com/JfQ1Njl.png) *(Add your project banner image here)*
+ 
 
 ## 📌 Overview
 
