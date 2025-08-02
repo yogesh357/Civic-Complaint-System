@@ -3,7 +3,7 @@
 
 ## 📌 Overview
 
-RequestHub is an innovative platform that enables citizens to report municipal issues (potholes, garbage, street lights, etc.) and provides AI-powered analysis for efficient resolution. Administrators can manage complaints with intelligent resource allocation estimates.
+RequestHub is a smart platform that lets citizens quickly report municipal issues like potholes, garbage, and streetlight faults. Using AI-powered analysis, it helps administrators prioritize cases and efficiently allocate resources for faster, more effective resolutions.
 
 ## ✨ Key Features
 
