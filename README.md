@@ -67,6 +67,7 @@ npm install
 cp .env.example .env
 # Configure your environment variables
 npm run dev
+```
 
 ### web applications images
 ```bash
