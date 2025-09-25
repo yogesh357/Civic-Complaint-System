@@ -67,3 +67,12 @@ npm install
 cp .env.example .env
 # Configure your environment variables
 npm run dev
+
+### web applications images
+```bash
+![Add Complaint](<img width="698" height="848" alt="image" src="https://github.com/user-attachments/assets/51d0b723-5e7a-460b-a809-b57381decada" />
+)
+![Track Complaint ](<img width="698" height="848" alt="image" src="https://github.com/user-attachments/assets/914b303d-9dda-4cd4-8897-ce634043cc07" />
+)
+![AI Analyse](<img width="875" height="836" alt="image" src="https://github.com/user-attachments/assets/ded7f873-762c-44b6-900c-1034be47dac7" />
+)
