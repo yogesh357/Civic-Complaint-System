@@ -72,5 +72,5 @@ npm run dev
 ### web applications images
 
 ![Add Complaint](https://github.com/user-attachments/assets/51d0b723-5e7a-460b-a809-b57381decada)
-![Track Complaint ](https://github.com/user-attachments/assets/914b303d-9dda-4cd4-8897-ce634043cc07.png)
-![AI Analyse]( https://github.com/user-attachments/assets/ded7f873-762c-44b6-900c-1034be47dac7.png)
+![Track Complaint](https://github.com/user-attachments/assets/914b303d-9dda-4cd4-8897-ce634043cc07.png)
+![AI Analyse](https://github.com/user-attachments/assets/ded7f873-762c-44b6-900c-1034be47dac7.png)
